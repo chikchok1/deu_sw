@@ -8,12 +8,12 @@ package ReservationForm;
  *
  * @author Sunghoon
  */
-public class ReservClass extends javax.swing.JFrame {
+public class ReservLab extends javax.swing.JFrame {
 
     /**
      * Creates new form ReservClass
      */
-    public ReservClass() {
+    public ReservLab() {
         initComponents();
     }
 
@@ -47,13 +47,13 @@ public class ReservClass extends javax.swing.JFrame {
 
         jTextField1.setText("jTextField1");
 
-        jLabel3.setText("강의실 선택");
+        jLabel3.setText("실습실 선택");
 
         jLabel4.setText("요일 선택");
 
         jLabel5.setText("시간 선택");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "908호", "912호", "913호", "914호", " " }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "911호", "915호", "916호", "918호", " " }));
 
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "월요일", "화요일", "수요일", "목요일", "금요일", " " }));
 
@@ -156,20 +156,21 @@ public class ReservClass extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ReservClass.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservLab.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ReservClass.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservLab.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ReservClass.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservLab.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ReservClass.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservLab.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ReservClass().setVisible(true);
+                new ReservLab().setVisible(true);
             }
         });
     }

@@ -111,7 +111,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel3">
       <Properties>
-        <Property name="text" type="java.lang.String" value="&#xac15;&#xc758;&#xc2e4; &#xc120;&#xd0dd;"/>
+        <Property name="text" type="java.lang.String" value="&#xc2e4;&#xc2b5;&#xc2e4; &#xc120;&#xd0dd;"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel4">
@@ -128,10 +128,10 @@
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
           <StringArray count="5">
-            <StringItem index="0" value="908&#xd638;"/>
-            <StringItem index="1" value="912&#xd638;"/>
-            <StringItem index="2" value="913&#xd638;"/>
-            <StringItem index="3" value="914&#xd638;"/>
+            <StringItem index="0" value="911&#xd638;"/>
+            <StringItem index="1" value="915&#xd638;"/>
+            <StringItem index="2" value="916&#xd638;"/>
+            <StringItem index="3" value="918&#xd638;"/>
             <StringItem index="4" value=" "/>
           </StringArray>
         </Property>

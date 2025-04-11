@@ -4,6 +4,7 @@
  */
 package ReservationForm;
 
+
 /**
  *
  * @author Sunghoon
@@ -36,8 +37,18 @@ public class RoomSelect extends javax.swing.JFrame {
         jLabel1.setText("에약할 교실을 선택해주세요");
 
         jButton1.setText("강의실");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jButton2.setText("실습실");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("에약한 강의실 보기");
 
@@ -77,6 +88,16 @@ public class RoomSelect extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        ReservClass reservClassPage = new ReservClass(); // ReservClass는 JFrame이라고 가정
+        reservClassPage.setVisible(true); // 새 창 띄우기
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    ReservLab reservLabPage = new ReservLab(); // ReservLab도 JFrame
+        reservLabPage.setVisible(true);
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
