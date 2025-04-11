@@ -45,8 +45,6 @@ public class ReservLab extends javax.swing.JFrame {
 
         jLabel2.setText("예약자");
 
-        jTextField1.setText("jTextField1");
-
         jLabel3.setText("실습실 선택");
 
         jLabel4.setText("요일 선택");

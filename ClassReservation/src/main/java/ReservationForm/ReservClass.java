@@ -45,7 +45,11 @@ public class ReservClass extends javax.swing.JFrame {
 
         jLabel2.setText("예약자");
 
-        jTextField1.setText("jTextField1");
+        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField1ActionPerformed(evt);
+            }
+        });
 
         jLabel3.setText("강의실 선택");
 
@@ -138,6 +142,10 @@ public class ReservClass extends javax.swing.JFrame {
         donePage.setVisible(true);
         dispose(); // 현재 창 닫기 (선택 사항)
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField1ActionPerformed
 
     /**
      * @param args the command line arguments
