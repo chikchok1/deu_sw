@@ -31,16 +31,16 @@
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="65" max="-2" attributes="0"/>
-                      <Component id="jButton1" min="-2" pref="114" max="-2" attributes="0"/>
+                      <Component id="Class" min="-2" pref="114" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="36" max="-2" attributes="0"/>
-                      <Component id="jButton2" min="-2" pref="114" max="-2" attributes="0"/>
+                      <Component id="Lab" min="-2" pref="114" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace pref="71" max="32767" attributes="0"/>
           </Group>
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-              <Component id="jButton3" min="-2" max="-2" attributes="0"/>
+              <Component id="ViewReserved" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="132" max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -52,11 +52,11 @@
               <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="59" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jButton2" alignment="3" min="-2" pref="55" max="-2" attributes="0"/>
-                  <Component id="jButton1" alignment="3" min="-2" pref="55" max="-2" attributes="0"/>
+                  <Component id="Lab" alignment="3" min="-2" pref="55" max="-2" attributes="0"/>
+                  <Component id="Class" alignment="3" min="-2" pref="55" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" pref="46" max="-2" attributes="0"/>
-              <Component id="jButton3" min="-2" max="-2" attributes="0"/>
+              <Component id="ViewReserved" min="-2" max="-2" attributes="0"/>
               <EmptySpace pref="94" max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -68,26 +68,29 @@
         <Property name="text" type="java.lang.String" value="&#xc5d0;&#xc57d;&#xd560; &#xad50;&#xc2e4;&#xc744; &#xc120;&#xd0dd;&#xd574;&#xc8fc;&#xc138;&#xc694;"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton1">
+    <Component class="javax.swing.JButton" name="Class">
       <Properties>
         <Property name="text" type="java.lang.String" value="&#xac15;&#xc758;&#xc2e4;"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ClassActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton2">
+    <Component class="javax.swing.JButton" name="Lab">
       <Properties>
         <Property name="text" type="java.lang.String" value="&#xc2e4;&#xc2b5;&#xc2e4;"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton2ActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="LabActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton3">
+    <Component class="javax.swing.JButton" name="ViewReserved">
       <Properties>
         <Property name="text" type="java.lang.String" value="&#xc5d0;&#xc57d;&#xd55c; &#xac15;&#xc758;&#xc2e4; &#xbcf4;&#xae30;"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ViewReservedActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

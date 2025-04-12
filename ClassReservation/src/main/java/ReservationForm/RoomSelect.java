@@ -28,29 +28,34 @@ public class RoomSelect extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        Class = new javax.swing.JButton();
+        Lab = new javax.swing.JButton();
+        ViewReserved = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setText("에약할 교실을 선택해주세요");
 
-        jButton1.setText("강의실");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        Class.setText("강의실");
+        Class.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                ClassActionPerformed(evt);
             }
         });
 
-        jButton2.setText("실습실");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        Lab.setText("실습실");
+        Lab.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                LabActionPerformed(evt);
             }
         });
 
-        jButton3.setText("에약한 강의실 보기");
+        ViewReserved.setText("에약한 강의실 보기");
+        ViewReserved.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ViewReservedActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -63,13 +68,13 @@ public class RoomSelect extends javax.swing.JFrame {
                         .addComponent(jLabel1))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(65, 65, 65)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(Class, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(36, 36, 36)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(Lab, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(71, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jButton3)
+                .addComponent(ViewReserved)
                 .addGap(132, 132, 132))
         );
         layout.setVerticalGroup(
@@ -79,25 +84,31 @@ public class RoomSelect extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addGap(59, 59, 59)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(Lab, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Class, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(46, 46, 46)
-                .addComponent(jButton3)
+                .addComponent(ViewReserved)
                 .addContainerGap(94, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void ClassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ClassActionPerformed
         ReservClass reservClassPage = new ReservClass(); // ReservClass는 JFrame이라고 가정
         reservClassPage.setVisible(true); // 새 창 띄우기
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_ClassActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void LabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LabActionPerformed
     ReservLab reservLabPage = new ReservLab(); // ReservLab도 JFrame
         reservLabPage.setVisible(true);
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_LabActionPerformed
+
+    private void ViewReservedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ViewReservedActionPerformed
+        // TODO add your handling code here:
+        ReservedClassRoom reservedClassRoomPage = new ReservedClassRoom();
+            reservedClassRoomPage.setVisible(true);
+    }//GEN-LAST:event_ViewReservedActionPerformed
 
     /**
      * @param args the command line arguments
@@ -135,9 +146,9 @@ public class RoomSelect extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton Class;
+    private javax.swing.JButton Lab;
+    private javax.swing.JButton ViewReserved;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }
