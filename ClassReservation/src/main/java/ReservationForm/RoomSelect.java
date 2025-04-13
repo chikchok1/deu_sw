@@ -4,6 +4,8 @@
  */
 package ReservationForm;
 
+import deu.CRS.Login.Login;
+
 
 /**
  *
@@ -31,6 +33,7 @@ public class RoomSelect extends javax.swing.JFrame {
         Class = new javax.swing.JButton();
         Lab = new javax.swing.JButton();
         ViewReserved = new javax.swing.JButton();
+        LogOut = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -57,10 +60,21 @@ public class RoomSelect extends javax.swing.JFrame {
             }
         });
 
+        LogOut.setText("로그아웃");
+        LogOut.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LogOutActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(ViewReserved)
+                .addGap(132, 132, 132))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -70,12 +84,11 @@ public class RoomSelect extends javax.swing.JFrame {
                         .addGap(65, 65, 65)
                         .addComponent(Class, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(36, 36, 36)
-                        .addComponent(Lab, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(Lab, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(LogOut)))
                 .addContainerGap(71, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(ViewReserved)
-                .addGap(132, 132, 132))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -88,7 +101,9 @@ public class RoomSelect extends javax.swing.JFrame {
                     .addComponent(Class, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(46, 46, 46)
                 .addComponent(ViewReserved)
-                .addContainerGap(94, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 65, Short.MAX_VALUE)
+                .addComponent(LogOut)
+                .addContainerGap())
         );
 
         pack();
@@ -109,6 +124,12 @@ public class RoomSelect extends javax.swing.JFrame {
         ReservedClassRoom reservedClassRoomPage = new ReservedClassRoom();
             reservedClassRoomPage.setVisible(true);
     }//GEN-LAST:event_ViewReservedActionPerformed
+
+    private void LogOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LogOutActionPerformed
+        // TODO add your handling code here:
+        dispose();
+        new Login().setVisible(true);
+    }//GEN-LAST:event_LogOutActionPerformed
 
     /**
      * @param args the command line arguments
@@ -148,6 +169,7 @@ public class RoomSelect extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton Class;
     private javax.swing.JButton Lab;
+    private javax.swing.JButton LogOut;
     private javax.swing.JButton ViewReserved;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
