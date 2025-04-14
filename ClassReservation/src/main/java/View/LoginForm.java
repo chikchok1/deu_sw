@@ -2,20 +2,22 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package deu.CRS.Login;
+package View;
 
-import ReservationForm.RoomSelect;
+import Controller.MembershipController;
+import Model.MembershipModel;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author YangJinWon
  */
-public class Login extends javax.swing.JFrame {
+public class LoginForm extends javax.swing.JFrame {
 
     /**
      * Creates new form Login
      */
-    public Login() {
+    public LoginForm() {
         initComponents();
     }
 
@@ -143,9 +145,7 @@ public class Login extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void LoginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginBtnActionPerformed
-        // TODO add your handling code here:
-         dispose();
-        new RoomSelect().setVisible(true);
+
     }//GEN-LAST:event_LoginBtnActionPerformed
 
     private void IDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IDActionPerformed
@@ -157,8 +157,22 @@ public class Login extends javax.swing.JFrame {
     }//GEN-LAST:event_PassWordActionPerformed
 
     private void membershipActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_membershipActionPerformed
-        // TODO add your handling code here:
-        //new Membership().setVisible(true);
+      /*
+        System.out.println("회원가입 버튼 클릭됨");
+
+        // 회원가입 창 구성
+    MembershipView membershipView = new MembershipView();
+    MembershipModel membershipModel = new MembershipModel("", "", "");
+    
+    // 컨트롤러 연결
+    new MembershipController(membershipView, membershipModel, this);
+    
+    // 회원가입 창 보여주기
+    membershipView.setVisible(true);
+
+    //  현재 로그인 창 숨기기
+    this.setVisible(false);
+        */
     }//GEN-LAST:event_membershipActionPerformed
 
     /**
@@ -178,20 +192,21 @@ public class Login extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(LoginForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(LoginForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(LoginForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(LoginForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Login().setVisible(true);
+                new LoginForm().setVisible(true);
             }
         });
     }
@@ -206,4 +221,24 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JButton membership;
     // End of variables declaration//GEN-END:variables
+
+public void addLoginListener(java.awt.event.ActionListener listener) {
+    LoginBtn.addActionListener(listener);
+}
+
+public void addJoinListener(java.awt.event.ActionListener listener) {
+    membership.addActionListener(listener);
+}
+
+public String getUserId() {
+    return ID.getText();
+}
+
+public String getPassword() {
+    return PassWord.getText();
+}
+
+public void showMessage(String message) {
+    JOptionPane.showMessageDialog(this, message);
+}
 }
