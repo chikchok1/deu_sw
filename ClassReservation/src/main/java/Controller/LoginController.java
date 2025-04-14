@@ -7,7 +7,7 @@ package Controller;
 import Model.MembershipModel;
 import View.LoginForm;
 import Model.UserDAO;
-import ReservationForm.RoomSelect;
+import View.RoomSelect;
 import View.MembershipView;
 
 public class LoginController {

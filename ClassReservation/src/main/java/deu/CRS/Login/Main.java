@@ -37,6 +37,7 @@ public class Main {
 
         loginForm.setVisible(true);
     }
+    
     /*
           // View, Model, DAO, Controller 생성
         MembershipView view = new MembershipView();

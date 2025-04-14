@@ -2,8 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package ReservationForm;
+package View;
 
+import View.ReservClass;
 import View.LoginForm;
 import deu.CRS.Login.Login;
 
@@ -20,6 +21,13 @@ public class RoomSelect extends javax.swing.JFrame {
     public RoomSelect() {
         initComponents();
     }
+    public javax.swing.JButton getClassButton() {
+    return Class;
+}
+
+public javax.swing.JButton getLabButton() {
+    return Lab;
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -111,13 +119,11 @@ public class RoomSelect extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void ClassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ClassActionPerformed
-        ReservClass reservClassPage = new ReservClass(); // ReservClass는 JFrame이라고 가정
-        reservClassPage.setVisible(true); // 새 창 띄우기
+        
     }//GEN-LAST:event_ClassActionPerformed
 
     private void LabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LabActionPerformed
-    ReservLab reservLabPage = new ReservLab(); // ReservLab도 JFrame
-        reservLabPage.setVisible(true);
+    
     }//GEN-LAST:event_LabActionPerformed
 
     private void ViewReservedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ViewReservedActionPerformed
