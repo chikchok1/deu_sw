@@ -156,6 +156,7 @@ public class ReservClass extends javax.swing.JFrame {
     private void ReservationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ReservationActionPerformed
         javax.swing.JOptionPane.showMessageDialog(this, "예약이 완료되었습니다!");
         dispose(); // 현재 창 닫기 (선택 사항)
+        new RoomSelect().setVisible(true);
     }//GEN-LAST:event_ReservationActionPerformed
 
     private void NameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NameActionPerformed

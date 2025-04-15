@@ -4,9 +4,6 @@
  */
 package View;
 
-import deu.CRS.Login.Login;
-
-
 /**
  *
  * @author Sunghoon
