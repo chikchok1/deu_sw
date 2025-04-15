@@ -4,7 +4,7 @@ import View.RoomSelect;
 import View.ReservClass;
 import View.ReservLab;
 import View.ReservedClassRoom;
-import deu.CRS.Login.Login;
+import Main.Login;
 
 public class RoomSelectController {
     private RoomSelect view;
