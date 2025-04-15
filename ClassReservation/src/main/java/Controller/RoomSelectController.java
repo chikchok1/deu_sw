@@ -1,44 +1,41 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Controller;
-
-/**
- *
- * @author Sunghoon
- */
 
 import View.RoomSelect;
 import View.ReservClass;
 import View.ReservLab;
 import View.ReservedClassRoom;
 import deu.CRS.Login.Login;
-import java.awt.event.ActionListener;
 
 public class RoomSelectController {
     private RoomSelect view;
 
     public RoomSelectController(RoomSelect view) {
         this.view = view;
-        initController();
-    }
 
-    private void initController() {
-        // 기존 RoomSelect에 있던 ActionListener 처리는 모두 이곳에서 설정
-        view.getClassButton().addActionListener(e -> openReservClass());
-        view.getLabButton().addActionListener(e -> openReservLab());
-        
+        // 버튼 클릭 시 동작 연결
+        this.view.setClassButtonActionListener(e -> openReservClass());
+        this.view.setLabButtonActionListener(e -> openReservLab());
+        this.view.setViewReservedActionListener(e -> openReservedClassRoom());
+        this.view.setLogOutButtonActionListener(e -> logOut());
     }
 
     private void openReservClass() {
-        view.setVisible(false);
         new ReservClass().setVisible(true);
+        view.dispose(); // 현재 창 닫기
     }
 
     private void openReservLab() {
-        view.setVisible(false);
         new ReservLab().setVisible(true);
+        view.dispose();
+    }
+
+    private void openReservedClassRoom() {
+        new ReservedClassRoom().setVisible(true);
+        view.dispose();
+    }
+
+    private void logOut() {
+        new Login().setVisible(true);
+        view.dispose();
     }
 }
-

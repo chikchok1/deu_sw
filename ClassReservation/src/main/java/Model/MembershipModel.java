@@ -9,7 +9,7 @@ public class MembershipModel {
     private String studentId;
     private String password;
 
-    // ✅ 기본 생성자 추가
+    //기본 생성자 추가
     public MembershipModel() {
         this.name = "";
         this.studentId = "";
@@ -48,17 +48,4 @@ public class MembershipModel {
         this.password = password;
     }
 
-    // 회원가입 처리 (단순히 로그로 처리)
-    public boolean register() {
-        try {
-            java.io.FileWriter writer = new java.io.FileWriter("users.txt", true); // append 모드
-            writer.write(name + "," + studentId + "," + password + "\n");
-            writer.close();
-            System.out.println("회원가입 성공: " + name + " (" + studentId + ")");
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 }
