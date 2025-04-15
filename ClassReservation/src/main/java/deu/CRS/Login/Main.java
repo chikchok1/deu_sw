@@ -5,11 +5,8 @@
 package deu.CRS.Login;
 
 import Controller.LoginController;
-import Controller.MembershipController;
-import Model.MembershipModel;
 import Model.UserDAO;
 import View.LoginForm;
-import View.MembershipView;
 
 /**
  *
@@ -32,22 +29,12 @@ public class Main {
         LoginForm loginForm = new LoginForm();
         UserDAO userDAO = new UserDAO();
 
-        // 🔽 LoginController 생성하면서 loginForm에 회원가입 로직도 붙일 예정
+        //LoginController 생성하면서 loginForm에 회원가입 로직도 붙일 예정
         new LoginController(loginForm, userDAO);
 
         loginForm.setVisible(true);
     }
     
-    /*
-          // View, Model, DAO, Controller 생성
-        MembershipView view = new MembershipView();
-        MembershipModel model = new MembershipModel();
-        UserDAO userDAO = new UserDAO();
-        LoginForm loginForm = new LoginForm(); // 로그인 폼도 필요함
-        MembershipController controller = new MembershipController(view, model, loginForm, userDAO);
-
-        // 뷰를 보여주기
-        view.setVisible(true);*/
     }
 
 

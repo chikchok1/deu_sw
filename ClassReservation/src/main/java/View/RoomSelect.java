@@ -4,8 +4,6 @@
  */
 package View;
 
-import View.ReservClass;
-import View.LoginForm;
 import deu.CRS.Login.Login;
 
 
@@ -27,6 +25,37 @@ public class RoomSelect extends javax.swing.JFrame {
 
 public javax.swing.JButton getLabButton() {
     return Lab;
+}
+// ViewReserved 버튼에 리스너 추가
+public void setViewReservedActionListener(java.awt.event.ActionListener listener) {
+    for (java.awt.event.ActionListener al : ViewReserved.getActionListeners()) {
+        ViewReserved.removeActionListener(al);
+    }
+    ViewReserved.addActionListener(listener);
+}
+
+// Class 버튼
+public void setClassButtonActionListener(java.awt.event.ActionListener listener) {
+    for (java.awt.event.ActionListener al : Class.getActionListeners()) {
+        Class.removeActionListener(al);
+    }
+    Class.addActionListener(listener);
+}
+
+// Lab 버튼
+public void setLabButtonActionListener(java.awt.event.ActionListener listener) {
+    for (java.awt.event.ActionListener al : Lab.getActionListeners()) {
+        Lab.removeActionListener(al);
+    }
+    Lab.addActionListener(listener);
+}
+
+// LogOut 버튼
+public void setLogOutButtonActionListener(java.awt.event.ActionListener listener) {
+    for (java.awt.event.ActionListener al : LogOut.getActionListeners()) {
+        LogOut.removeActionListener(al);
+    }
+    LogOut.addActionListener(listener);
 }
 
     /**
@@ -127,17 +156,19 @@ public javax.swing.JButton getLabButton() {
     }//GEN-LAST:event_LabActionPerformed
 
     private void ViewReservedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ViewReservedActionPerformed
-        // TODO add your handling code here:
+       /*
         ReservedClassRoom reservedClassRoomPage = new ReservedClassRoom();
             reservedClassRoomPage.setVisible(true);
+        */
     }//GEN-LAST:event_ViewReservedActionPerformed
 
     private void LogOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LogOutActionPerformed
+       /*
         // TODO add your handling code here:
         dispose();
         new Login().setVisible(true);
+        */
     }//GEN-LAST:event_LogOutActionPerformed
-
     /**
      * @param args the command line arguments
      */

@@ -4,8 +4,6 @@
  */
 package View;
 
-import Controller.MembershipController;
-import Model.MembershipModel;
 import javax.swing.JOptionPane;
 
 /**
@@ -21,6 +19,25 @@ public class LoginForm extends javax.swing.JFrame {
         initComponents();
     }
 
+    public void addLoginListener(java.awt.event.ActionListener listener) {
+    LoginBtn.addActionListener(listener);
+}
+
+public void addJoinListener(java.awt.event.ActionListener listener) {
+    membership.addActionListener(listener);
+}
+
+public String getUserId() {
+    return ID.getText();
+}
+
+public String getPassword() {
+    return PassWord.getText();
+}
+
+public void showMessage(String message) {
+    JOptionPane.showMessageDialog(this, message);
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -157,22 +174,7 @@ public class LoginForm extends javax.swing.JFrame {
     }//GEN-LAST:event_PassWordActionPerformed
 
     private void membershipActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_membershipActionPerformed
-      /*
-        System.out.println("회원가입 버튼 클릭됨");
-
-        // 회원가입 창 구성
-    MembershipView membershipView = new MembershipView();
-    MembershipModel membershipModel = new MembershipModel("", "", "");
-    
-    // 컨트롤러 연결
-    new MembershipController(membershipView, membershipModel, this);
-    
-    // 회원가입 창 보여주기
-    membershipView.setVisible(true);
-
-    //  현재 로그인 창 숨기기
-    this.setVisible(false);
-        */
+ 
     }//GEN-LAST:event_membershipActionPerformed
 
     /**
@@ -221,24 +223,4 @@ public class LoginForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JButton membership;
     // End of variables declaration//GEN-END:variables
-
-public void addLoginListener(java.awt.event.ActionListener listener) {
-    LoginBtn.addActionListener(listener);
-}
-
-public void addJoinListener(java.awt.event.ActionListener listener) {
-    membership.addActionListener(listener);
-}
-
-public String getUserId() {
-    return ID.getText();
-}
-
-public String getPassword() {
-    return PassWord.getText();
-}
-
-public void showMessage(String message) {
-    JOptionPane.showMessageDialog(this, message);
-}
 }
