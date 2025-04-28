@@ -4,22 +4,57 @@
  */
 package View;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
+import java.awt.event.ActionListener;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author Sunghoon
  */
-public class ReservClass extends javax.swing.JFrame {
+public class ReservClassView extends javax.swing.JFrame {
 
     /**
      * Creates new form ReservClass
      */
-    public ReservClass() {
+    public ReservClassView() {
         initComponents();
     }
 
+   // 버튼 리스너 등록
+    public void addReservationListener(ActionListener listener) {
+        Reservation.addActionListener(listener); // 버튼에 바로 리스너 붙이기
+    }
+
+    public String getSelectedClassRoom() {
+        return Class.getSelectedItem().toString();
+    }
+
+    public String getSelectedDay() {
+        return Day.getSelectedItem().toString();
+    }
+
+    public String getSelectedTime() {
+        return Time.getSelectedItem().toString();
+    }
+
+    public String getPurpose() {
+        return Purpose.getSelectedItem().toString().trim();
+    }
+
+    public void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+    public void closeView() {
+        this.dispose();
+    }
+    
+    public void resetReservationButtonListener() {
+    for (ActionListener al : Reservation.getActionListeners()) {
+        Reservation.removeActionListener(al);
+    }
+}
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -146,37 +181,7 @@ public class ReservClass extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void ReservationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ReservationActionPerformed
-       try {
-        // 로그인한 사용자 이름 가져오기
-        String userName = Model.Session.getLoggedInUserName();
-        
-        // 선택한 강의실, 요일, 시간, 사용 목적 가져오기
-        String selectedClassRoom = Class.getSelectedItem().toString();
-        String selectedDay = Day.getSelectedItem().toString();
-        String selectedTime = Time.getSelectedItem().toString();
-        String purpose = Purpose.getSelectedItem().toString().trim(); // 입력창 공백 제거
-        
-        if (purpose.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, "사용 목적을 입력해주세요.");
-            return;
-        }
-
-        // 파일에 기록
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("ReserveClass.txt", true))) {
-            writer.write(userName + "," + selectedClassRoom + "," + selectedDay + "," + selectedTime + "," + purpose);
-            writer.newLine();
-        }
-
-        // 예약 완료 알림
-        javax.swing.JOptionPane.showMessageDialog(this, "예약이 완료되었습니다!");
-
-        dispose(); // 현재 창 닫기
-        new RoomSelect().setVisible(true); // 다시 선택 화면 열기
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        javax.swing.JOptionPane.showMessageDialog(this, "예약 중 오류 발생: " + e.getMessage());
-    }
+       
     }//GEN-LAST:event_ReservationActionPerformed
 
     private void DayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DayActionPerformed
@@ -212,20 +217,21 @@ public class ReservClass extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ReservClass.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservClassView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ReservClass.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservClassView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ReservClass.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservClassView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ReservClass.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservClassView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ReservClass().setVisible(true);
+                new ReservClassView().setVisible(true);
             }
         });
     }

@@ -4,18 +4,89 @@
  */
 package View;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+
 /**
  *
  * @author YangJinWon
  */
-public class ReservedClassRoom extends javax.swing.JFrame {
+public class ReservedRoomView extends javax.swing.JFrame {
 
-    /**
-     * Creates new form ReservedClassRoom
-     */
-    public ReservedClassRoom() {
+   public ReservedRoomView() {
         initComponents();
+        
     }
+   private void loadReservedRooms(String selectedRoom) {
+    try {
+        // 테이블 초기화
+        for (int row = 0; row < jTable1.getRowCount(); row++) {
+            for (int col = 1; col < jTable1.getColumnCount(); col++) { // 0열은 시간대라 제외
+                jTable1.setValueAt("", row, col);
+            }
+        }
+
+        BufferedReader reader = new BufferedReader(new FileReader("ReserveClass.txt"));
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",");
+            if (parts.length < 5) continue; // 데이터 이상 있을 경우 skip
+
+            String name = parts[0];
+            String room = parts[1];
+            String day = parts[2];
+            String period = parts[3];
+            String purpose = parts[4];
+
+            if (!selectedRoom.equals("선택") && !room.equals(selectedRoom)) {
+                continue; // 선택된 강의실과 다르면 건너뜀
+            }
+
+            int col = getDayColumn(day);
+            int row = getPeriodRow(period);
+
+            if (col != -1 && row != -1) {
+                String current = (String) jTable1.getValueAt(row, col);
+                if (current == null || current.isEmpty()) {
+                    jTable1.setValueAt(name, row, col);
+                } else {
+                    jTable1.setValueAt(current + ", " + name, row, col);
+                }
+            }
+        }
+
+        reader.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+   private int getDayColumn(String day) {
+    switch (day) {
+        case "월요일": return 1;
+        case "화요일": return 2;
+        case "수요일": return 3;
+        case "목요일": return 4;
+        case "금요일": return 5;
+        default: return -1;
+    }
+}
+
+   private int getPeriodRow(String period) {
+    switch (period) {
+        case "1교시(09:00~10:00)": return 0;
+        case "2교시(10:00~11:00)": return 1;
+        case "3교시(11:00~12:00)": return 2;
+        case "4교시(12:00~13:00)": return 3;
+        case "5교시(13:00~14:00)": return 4;
+        case "6교시(14:00~15:00)": return 5;
+        case "7교시(15:00~16:00)": return 6;
+        case "8교시(16:00~17:00)": return 7;
+        case "9교시(17:00~18:00)": return 8;
+        default: return -1;
+    }
+}
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -63,14 +134,14 @@ public class ReservedClassRoom extends javax.swing.JFrame {
 
         jLabel3.setText("실습실");
 
-        Class.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "908호", "912호", "913호", "914호" }));
+        Class.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "선택", "908호", "912호", "913호", "914호" }));
         Class.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ClassActionPerformed(evt);
             }
         });
 
-        Lab.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "911호", "915호", "916호", "918호" }));
+        Lab.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "선택", "911호", "915호", "916호", "918호" }));
         Lab.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 LabActionPerformed(evt);
@@ -149,11 +220,13 @@ public class ReservedClassRoom extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void CheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CheckActionPerformed
-        // TODO add your handling code here:
+ String selectedRoom = (String) Class.getSelectedItem(); 
+    loadReservedRooms(selectedRoom);
     }//GEN-LAST:event_CheckActionPerformed
 
     private void ClassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ClassActionPerformed
-        // TODO add your handling code here:
+String selectedRoom = (String) Class.getSelectedItem();
+    loadReservedRooms(selectedRoom);
     }//GEN-LAST:event_ClassActionPerformed
 
     private void LabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LabActionPerformed
@@ -182,20 +255,21 @@ public class ReservedClassRoom extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ReservedClassRoom.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservedRoomView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ReservedClassRoom.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservedRoomView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ReservedClassRoom.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservedRoomView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ReservedClassRoom.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservedRoomView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ReservedClassRoom().setVisible(true);
+                new ReservedRoomView().setVisible(true);
             }
         });
     }

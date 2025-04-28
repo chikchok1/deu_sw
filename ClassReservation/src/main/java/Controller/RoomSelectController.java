@@ -2,10 +2,10 @@
 
     import Model.UserDAO;
     import View.RoomSelect;
-    import View.ReservClass;
+    import View.ReservClassView;
     import View.ReservLab;
-    import View.ReservedClassRoom;
     import View.LoginForm;
+    import View.ReservedRoomView;
 
     public class RoomSelectController {
         private RoomSelect view;
@@ -21,8 +21,10 @@
         }
 
         private void openReservClass() {
-            new ReservClass().setVisible(true);
-            view.dispose(); // 현재 창 닫기
+            ReservClassView reservClassView = new ReservClassView();
+    new ReservClassController(reservClassView); // 컨트롤러 생성 및 뷰 연결
+    reservClassView.setVisible(true); // 화면 활성화
+    view.dispose(); // 현재 창 닫기
         }
 
         private void openReservLab() {
@@ -31,7 +33,7 @@
         }
 
         private void openReservedClassRoom() {
-            new ReservedClassRoom().setVisible(true);
+            new ReservedRoomView().setVisible(true);
             view.dispose();
         }
 

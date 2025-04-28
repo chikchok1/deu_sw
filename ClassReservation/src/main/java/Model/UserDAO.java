@@ -20,7 +20,7 @@ public class UserDAO {
         if (!file.exists()) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
                 if (fileName.equals(USER_FILE)) {
-                    writer.write("admin,S001,1234567"); // 포맷 변경: S+3자리, 비번 7자리
+                    writer.write("admin,S001,1234567"); // 포맷: 이름, 학번, 비번
                     writer.newLine();
                 }
                 System.out.println(fileName + " 파일이 생성되었습니다.");
@@ -65,7 +65,30 @@ public class UserDAO {
         return false;
     }
 
-    // 🔥 userId로 이름 가져오기 추가
+    // 🔥 추가: userId가 이미 존재하는지 확인
+    public boolean isUserIdExists(String userId) {
+        String fileName = getFileNameByUserId(userId);
+        if (fileName == null) return false;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 2) {
+                    String storedId = tokens[1].trim();
+                    if (storedId.equals(userId)) {
+                        return true; // 이미 존재
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("파일 읽기 오류: " + e.getMessage());
+        }
+
+        return false;
+    }
+
+    // userId로 이름 가져오기
     public String getUserNameById(String userId) {
         String fileName = getFileNameByUserId(userId);
         if (fileName == null) return null;
@@ -114,7 +137,7 @@ public class UserDAO {
         }
     }
 
-    // (파일명 구하는 메서드)
+    // 파일명 구하는 메서드
     private String getFileNameByUserId(String userId) {
         String firstLetter = userId.substring(0, 1);
 
