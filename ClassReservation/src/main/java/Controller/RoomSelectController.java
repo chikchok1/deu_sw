@@ -1,41 +1,48 @@
-package Controller;
+    package Controller;
 
-import View.RoomSelect;
-import View.ReservClass;
-import View.ReservLab;
-import View.ReservedClassRoom;
-import Main.Login;
+    import Model.UserDAO;
+    import View.RoomSelect;
+    import View.ReservClass;
+    import View.ReservLab;
+    import View.ReservedClassRoom;
+    import View.LoginForm;
 
-public class RoomSelectController {
-    private RoomSelect view;
+    public class RoomSelectController {
+        private RoomSelect view;
 
-    public RoomSelectController(RoomSelect view) {
-        this.view = view;
+        public RoomSelectController(RoomSelect view) {
+            this.view = view;
 
-        // 버튼 클릭 시 동작 연결
-        this.view.setClassButtonActionListener(e -> openReservClass());
-        this.view.setLabButtonActionListener(e -> openReservLab());
-        this.view.setViewReservedActionListener(e -> openReservedClassRoom());
-        this.view.setLogOutButtonActionListener(e -> logOut());
+            // 버튼 클릭 시 동작 연결
+            this.view.setClassButtonActionListener(e -> openReservClass());
+            this.view.setLabButtonActionListener(e -> openReservLab());
+            this.view.setViewReservedActionListener(e -> openReservedClassRoom());
+             this.view.setLogOutButtonActionListener(e -> handleLogout());
+        }
+
+        private void openReservClass() {
+            new ReservClass().setVisible(true);
+            view.dispose(); // 현재 창 닫기
+        }
+
+        private void openReservLab() {
+            new ReservLab().setVisible(true);
+            view.dispose();
+        }
+
+        private void openReservedClassRoom() {
+            new ReservedClassRoom().setVisible(true);
+            view.dispose();
+        }
+
+        private void handleLogout() {
+            view.dispose(); // 현재 창 닫기
+
+            // 다시 로그인 폼 띄우기
+            LoginForm loginForm = new LoginForm();
+            UserDAO dao = new UserDAO();
+            new LoginController(loginForm, dao);
+
+            loginForm.setVisible(true);
+        }
     }
-
-    private void openReservClass() {
-        new ReservClass().setVisible(true);
-        view.dispose(); // 현재 창 닫기
-    }
-
-    private void openReservLab() {
-        new ReservLab().setVisible(true);
-        view.dispose();
-    }
-
-    private void openReservedClassRoom() {
-        new ReservedClassRoom().setVisible(true);
-        view.dispose();
-    }
-
-    private void logOut() {
-        new Login().setVisible(true);
-        view.dispose();
-    }
-}

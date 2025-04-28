@@ -4,6 +4,9 @@
  */
 package View;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
 /**
  *
  * @author Sunghoon
@@ -27,8 +30,6 @@ public class ReservClass extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        Name = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
@@ -44,14 +45,6 @@ public class ReservClass extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("맑은 고딕", 0, 13)); // NOI18N
         jLabel1.setText("강의실 예약 정보 기입란");
 
-        jLabel2.setText("예약자");
-
-        Name.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NameActionPerformed(evt);
-            }
-        });
-
         jLabel3.setText("강의실 선택");
 
         jLabel4.setText("요일 선택");
@@ -59,6 +52,11 @@ public class ReservClass extends javax.swing.JFrame {
         jLabel5.setText("시간 선택");
 
         Class.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "908호", "912호", "913호", "914호" }));
+        Class.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ClassActionPerformed(evt);
+            }
+        });
 
         Day.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "월요일", "화요일", "수요일", "목요일", "금요일" }));
         Day.addActionListener(new java.awt.event.ActionListener() {
@@ -99,13 +97,11 @@ public class ReservClass extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel4)
                     .addComponent(jLabel3)
-                    .addComponent(jLabel2)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(jLabel6)
                         .addComponent(jLabel5)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(Name, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(Class, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(Day, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(Time, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -125,11 +121,7 @@ public class ReservClass extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(25, 25, 25)
                 .addComponent(jLabel1)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(Name, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(53, 53, 53)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(Class, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -154,14 +146,38 @@ public class ReservClass extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void ReservationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ReservationActionPerformed
-        javax.swing.JOptionPane.showMessageDialog(this, "예약이 완료되었습니다!");
-        dispose(); // 현재 창 닫기 (선택 사항)
-        new RoomSelect().setVisible(true);
-    }//GEN-LAST:event_ReservationActionPerformed
+       try {
+        // 로그인한 사용자 이름 가져오기
+        String userName = Model.Session.getLoggedInUserName();
+        
+        // 선택한 강의실, 요일, 시간, 사용 목적 가져오기
+        String selectedClassRoom = Class.getSelectedItem().toString();
+        String selectedDay = Day.getSelectedItem().toString();
+        String selectedTime = Time.getSelectedItem().toString();
+        String purpose = Purpose.getSelectedItem().toString().trim(); // 입력창 공백 제거
+        
+        if (purpose.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "사용 목적을 입력해주세요.");
+            return;
+        }
 
-    private void NameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NameActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_NameActionPerformed
+        // 파일에 기록
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("ReserveClass.txt", true))) {
+            writer.write(userName + "," + selectedClassRoom + "," + selectedDay + "," + selectedTime + "," + purpose);
+            writer.newLine();
+        }
+
+        // 예약 완료 알림
+        javax.swing.JOptionPane.showMessageDialog(this, "예약이 완료되었습니다!");
+
+        dispose(); // 현재 창 닫기
+        new RoomSelect().setVisible(true); // 다시 선택 화면 열기
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        javax.swing.JOptionPane.showMessageDialog(this, "예약 중 오류 발생: " + e.getMessage());
+    }
+    }//GEN-LAST:event_ReservationActionPerformed
 
     private void DayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DayActionPerformed
         // TODO add your handling code here:
@@ -174,6 +190,10 @@ public class ReservClass extends javax.swing.JFrame {
     private void PurposeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PurposeActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_PurposeActionPerformed
+
+    private void ClassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ClassActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_ClassActionPerformed
 
     /**
      * @param args the command line arguments
@@ -213,12 +233,10 @@ public class ReservClass extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> Class;
     private javax.swing.JComboBox<String> Day;
-    private javax.swing.JTextField Name;
     private javax.swing.JComboBox<String> Purpose;
     private javax.swing.JButton Reservation;
     private javax.swing.JComboBox<String> Time;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
