@@ -33,7 +33,23 @@ public class MembershipController {
                     return;
                 }
 
-                // 모델에 정보 저장 (화면상 데이터 유지 목적)
+                if (!isValidId(studentId)) {
+                    view.showMessage("아이디는 대문자 S/P/A + 숫자 3개로 구성되어야 합니다.\n예: S123");
+                    return;
+                }
+
+                if (!isValidPassword(password)) {
+                    view.showMessage("비밀번호는 주민등록번호 뒷자리 7자리여야 합니다.");
+                    return;
+                }
+
+                // 🔥 여기 추가: 중복 아이디 검사
+                if (userDAO.isUserIdExists(studentId)) {
+                    view.showMessage("이미 존재하는 학번입니다. 다른 학번을 사용해주세요.");
+                    return;
+                }
+
+                // 모델에 정보 저장
                 model.setName(name);
                 model.setStudentId(studentId);
                 model.setPassword(password);
@@ -42,11 +58,20 @@ public class MembershipController {
                 User user = new User(studentId, password);
                 userDAO.registerUser(user, name);
 
-                // 완료 메시지 및 화면 전환
                 view.showMessage("회원가입이 완료되었습니다.");
                 view.disposeView();
                 loginForm.setVisible(true);
             }
         });
+    }
+
+    // 아이디(학번) 유효성 검사
+    private boolean isValidId(String userId) {
+        return userId.matches("[SPA][0-9]{3}");
+    }
+
+    // 비밀번호(주민등록번호 뒷자리 7자리) 유효성 검사
+    private boolean isValidPassword(String password) {
+        return password.matches("\\d{7}");
     }
 }

@@ -1,27 +1,29 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Model;
 
 import java.io.*;
+import javax.swing.JOptionPane;
 
 public class UserDAO {
-    private static final String FILE_PATH = "users.txt"; // 사용자 정보 텍스트 파일
+    private static final String USER_FILE = "users.txt";
+    private static final String PROF_FILE = "prof.txt";
+    private static final String ASSISTANT_FILE = "assistant.txt";
 
     public UserDAO() {
-        createFileIfNotExists();
+        createFileIfNotExists(USER_FILE);
+        createFileIfNotExists(PROF_FILE);
+        createFileIfNotExists(ASSISTANT_FILE);
     }
 
-    // users.txt 파일이 없으면 생성
-    private void createFileIfNotExists() {
-        File file = new File(FILE_PATH);
+    // 파일이 없으면 생성
+    private void createFileIfNotExists(String fileName) {
+        File file = new File(fileName);
         if (!file.exists()) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                // 기본 관리자 계정 추가 (선택사항)
-                writer.write("admin,1234");
-                writer.newLine();
-                System.out.println("users.txt 파일이 생성되었습니다 (기본 계정 포함)");
+                if (fileName.equals(USER_FILE)) {
+                    writer.write("admin,S001,1234567"); // 포맷: 이름, 학번, 비번
+                    writer.newLine();
+                }
+                System.out.println(fileName + " 파일이 생성되었습니다.");
             } catch (IOException e) {
                 System.out.println("파일 생성 오류: " + e.getMessage());
             }
@@ -30,36 +32,130 @@ public class UserDAO {
 
     // 로그인 검증
     public boolean validateUser(String userId, String password) {
-    try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-        String line;
+        if (!isValidId(userId)) {
+            System.out.println("잘못된 학번 형식입니다: " + userId);
+            return false;
+        }
 
-        while ((line = reader.readLine()) != null) {
-            String[] tokens = line.split(",");
-            if (tokens.length >= 3) {
-                String storedId = tokens[1].trim();         // 학번 (아이디)
-                String storedPassword = tokens[2].trim();   // 비밀번호
+        if (password.length() != 7) {
+            System.out.println("비밀번호는 7자리여야 합니다: " + password);
+            return false;
+        }
 
-                if (storedId.equals(userId) && storedPassword.equals(password)) {
-                    return true;
+        String fileName = getFileNameByUserId(userId);
+        if (fileName == null) return false;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 3) {
+                    String storedId = tokens[1].trim();
+                    String storedPassword = tokens[2].trim();
+
+                    if (storedId.equals(userId) && storedPassword.equals(password)) {
+                        return true;
+                    }
                 }
             }
+        } catch (IOException e) {
+            System.out.println("파일 읽기 오류: " + e.getMessage());
         }
-    } catch (IOException e) {
-        System.out.println("파일 읽기 오류: " + e.getMessage());
+
+        return false;
     }
 
-    return false;
-}
+    // 🔥 추가: userId가 이미 존재하는지 확인
+    public boolean isUserIdExists(String userId) {
+        String fileName = getFileNameByUserId(userId);
+        if (fileName == null) return false;
 
-    // 사용자 정보 파일에 저장 (회원가입)
-   // 예: 이름, 학번, 비밀번호 순으로 저장
-public void registerUser(User user, String name) {
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
-        writer.write(name + "," + user.getUserId() + "," + user.getPassword());
-        writer.newLine();
-        System.out.println("새로운 사용자 정보가 저장되었습니다: " + user.getUserId());
-    } catch (IOException e) {
-        System.out.println("파일 쓰기 오류: " + e.getMessage());
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 2) {
+                    String storedId = tokens[1].trim();
+                    if (storedId.equals(userId)) {
+                        return true; // 이미 존재
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("파일 읽기 오류: " + e.getMessage());
+        }
+
+        return false;
     }
-}
+
+    // userId로 이름 가져오기
+    public String getUserNameById(String userId) {
+        String fileName = getFileNameByUserId(userId);
+        if (fileName == null) return null;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 3) {
+                    String storedId = tokens[1].trim();
+                    if (storedId.equals(userId)) {
+                        return tokens[0].trim(); // 이름 반환
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("파일 읽기 오류: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    // 회원가입
+    public void registerUser(User user, String name) {
+        String userId = user.getUserId();
+
+        if (!isValidId(userId)) {
+            JOptionPane.showMessageDialog(null, "잘못된 학번 형식입니다: " + userId);
+            return;
+        }
+
+        if (user.getPassword().length() != 7) {
+            JOptionPane.showMessageDialog(null, "비밀번호는 7자리여야 합니다: " + user.getPassword());
+            return;
+        }
+
+        String fileName = getFileNameByUserId(userId);
+        if (fileName == null) return;
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+            writer.write(name + "," + userId + "," + user.getPassword());
+            writer.newLine();
+            System.out.println("새로운 사용자 정보가 저장되었습니다: " + userId + " (" + fileName + ")");
+        } catch (IOException e) {
+            System.out.println("파일 쓰기 오류: " + e.getMessage());
+        }
+    }
+
+    // 파일명 구하는 메서드
+    private String getFileNameByUserId(String userId) {
+        String firstLetter = userId.substring(0, 1);
+
+        switch (firstLetter) {
+            case "S":
+                return USER_FILE;
+            case "P":
+                return PROF_FILE;
+            case "A":
+                return ASSISTANT_FILE;
+            default:
+                System.out.println("학번이 S, P, A로 시작하지 않습니다: " + userId);
+                return null;
+        }
+    }
+
+    // 아이디(학번) 유효성 검사
+    private boolean isValidId(String userId) {
+        return userId.matches("[SPA][0-9]{3}"); // 문자 1개 + 숫자 3자리
+    }
 }

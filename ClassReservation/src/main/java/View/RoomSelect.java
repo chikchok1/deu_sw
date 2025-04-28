@@ -23,6 +23,7 @@ public class RoomSelect extends javax.swing.JFrame {
 public javax.swing.JButton getLabButton() {
     return Lab;
 }
+
 // ViewReserved 버튼에 리스너 추가
 public void setViewReservedActionListener(java.awt.event.ActionListener listener) {
     for (java.awt.event.ActionListener al : ViewReserved.getActionListeners()) {
@@ -153,18 +154,11 @@ public void setLogOutButtonActionListener(java.awt.event.ActionListener listener
     }//GEN-LAST:event_LabActionPerformed
 
     private void ViewReservedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ViewReservedActionPerformed
-       /*
-        ReservedClassRoom reservedClassRoomPage = new ReservedClassRoom();
-            reservedClassRoomPage.setVisible(true);
-        */
+       
     }//GEN-LAST:event_ViewReservedActionPerformed
 
     private void LogOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LogOutActionPerformed
-       /*
-        // TODO add your handling code here:
-        dispose();
-        new Login().setVisible(true);
-        */
+      
     }//GEN-LAST:event_LogOutActionPerformed
     /**
      * @param args the command line arguments
