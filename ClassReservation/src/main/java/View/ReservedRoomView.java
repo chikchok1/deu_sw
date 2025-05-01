@@ -4,6 +4,7 @@
  */
 package View;
 
+import Model.Session;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
@@ -17,41 +18,56 @@ public class ReservedRoomView extends javax.swing.JFrame {
         initComponents();
         
     }
+   
    private void loadReservedRooms(String selectedRoom) {
     try {
+        String userId = Session.getLoggedInUserId();
+        if (userId == null || userId.isEmpty()) return;
+
+        char userType = userId.charAt(0); // 'S', 'P', 'A'
+        String userName = Session.getLoggedInUserName(); // 예약자 이름 확인용
+
         // 테이블 초기화
         for (int row = 0; row < jTable1.getRowCount(); row++) {
-            for (int col = 1; col < jTable1.getColumnCount(); col++) { // 0열은 시간대라 제외
+            for (int col = 1; col < jTable1.getColumnCount(); col++) {
                 jTable1.setValueAt("", row, col);
             }
         }
 
-        BufferedReader reader = new BufferedReader(new FileReader("ReserveClass.txt"));
+        BufferedReader reader = new BufferedReader(new FileReader("data/ReserveClass.txt"));
         String line;
 
         while ((line = reader.readLine()) != null) {
             String[] parts = line.split(",");
-            if (parts.length < 5) continue; // 데이터 이상 있을 경우 skip
+            if (parts.length < 5) continue;
 
-            String name = parts[0];
-            String room = parts[1];
-            String day = parts[2];
-            String period = parts[3];
-            String purpose = parts[4];
+            String name = parts[0].trim();
+            String room = parts[1].trim();
+            String day = parts[2].trim();
+            String period = parts[3].trim();
+            String purpose = parts[4].trim();
 
+            // 선택된 강의실 필터
             if (!selectedRoom.equals("선택") && !room.equals(selectedRoom)) {
-                continue; // 선택된 강의실과 다르면 건너뜀
+                continue;
+            }
+
+            // 학생일 경우, 자신의 예약이 아니면 continue
+            if (userType == 'S' && !name.equals(userName)) {
+                continue;
             }
 
             int col = getDayColumn(day);
             int row = getPeriodRow(period);
 
             if (col != -1 && row != -1) {
+                String displayText = (userType == 'S') ? "예약됨" : name;
+
                 String current = (String) jTable1.getValueAt(row, col);
                 if (current == null || current.isEmpty()) {
-                    jTable1.setValueAt(name, row, col);
-                } else {
-                    jTable1.setValueAt(current + ", " + name, row, col);
+                    jTable1.setValueAt(displayText, row, col);
+                } else if (!current.contains(displayText)) {
+                    jTable1.setValueAt(current + ", " + displayText, row, col);
                 }
             }
         }
@@ -61,6 +77,8 @@ public class ReservedRoomView extends javax.swing.JFrame {
         e.printStackTrace();
     }
 }
+
+
    private int getDayColumn(String day) {
     switch (day) {
         case "월요일": return 1;
