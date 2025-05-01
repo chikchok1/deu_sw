@@ -4,19 +4,57 @@
  */
 package View;
 
+import java.awt.event.ActionListener;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Sunghoon
  */
-public class ReservLab extends javax.swing.JFrame {
+public class ReservLabView extends javax.swing.JFrame {
 
     /**
      * Creates new form ReservClass
      */
-    public ReservLab() {
+    public ReservLabView() {
         initComponents();
     }
 
+    // 버튼 리스너 등록
+    public void addReservationListener(ActionListener listener) {
+        Reservation.addActionListener(listener); // 버튼에 바로 리스너 붙이기
+    }
+
+    public String getSelectedClassRoom() {
+        return Lab.getSelectedItem().toString();
+    }
+
+    public String getSelectedDay() {
+        return Day.getSelectedItem().toString();
+    }
+
+    public String getSelectedTime() {
+        return Time.getSelectedItem().toString();
+    }
+
+    public String getPurpose() {
+        return Purpose.getSelectedItem().toString().trim();
+    }
+
+    public void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+    public void closeView() {
+        this.dispose();
+    }
+    
+    public void resetReservationButtonListener() {
+    for (ActionListener al : Reservation.getActionListeners()) {
+        Reservation.removeActionListener(al);
+    }
+}
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -143,8 +181,7 @@ public class ReservLab extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void ReservationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ReservationActionPerformed
-        javax.swing.JOptionPane.showMessageDialog(this, "예약이 완료되었습니다!");
-        dispose(); // 현재 창 닫기 (선택 사항)
+       
     }//GEN-LAST:event_ReservationActionPerformed
 
     private void LabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LabActionPerformed
@@ -180,21 +217,23 @@ public class ReservLab extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ReservLab.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservLabView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ReservLab.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservLabView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ReservLab.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservLabView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ReservLab.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ReservLabView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ReservLab().setVisible(true);
+                new ReservLabView().setVisible(true);
             }
         });
     }
