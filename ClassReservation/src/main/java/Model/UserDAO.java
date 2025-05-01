@@ -4,26 +4,39 @@ import java.io.*;
 import javax.swing.JOptionPane;
 
 public class UserDAO {
-    private static final String USER_FILE = "users.txt";
-    private static final String PROF_FILE = "prof.txt";
-    private static final String ASSISTANT_FILE = "assistant.txt";
+
+    private static final String DATA_FOLDER = "data"; // 전용 폴더
+    private static final String USER_FILE = DATA_FOLDER + "/users.txt";
+    private static final String PROF_FILE = DATA_FOLDER + "/prof.txt";
+    private static final String ASSISTANT_FILE = DATA_FOLDER + "/assistant.txt";
+    private static final String RESERVE_FILE = DATA_FOLDER + "/ReserveClass.txt"; 
 
     public UserDAO() {
+        createDataFolderIfNotExists();
         createFileIfNotExists(USER_FILE);
         createFileIfNotExists(PROF_FILE);
         createFileIfNotExists(ASSISTANT_FILE);
+        createFileIfNotExists(RESERVE_FILE); 
     }
 
-    // 파일이 없으면 생성
+    //  data 폴더 없으면 생성
+    private void createDataFolderIfNotExists() {
+        File folder = new File(DATA_FOLDER);
+        if (!folder.exists()) {
+            if (folder.mkdirs()) {
+                System.out.println("data 폴더가 생성되었습니다.");
+            }
+        }
+    }
+
+    // 파일이 없으면 생성 (내용 없이 빈 파일로)
     private void createFileIfNotExists(String fileName) {
         File file = new File(fileName);
         if (!file.exists()) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                if (fileName.equals(USER_FILE)) {
-                    writer.write("admin,S001,1234567"); // 포맷: 이름, 학번, 비번
-                    writer.newLine();
+            try {
+                if (file.createNewFile()) {
+                    System.out.println(fileName + " 파일이 생성되었습니다.");
                 }
-                System.out.println(fileName + " 파일이 생성되었습니다.");
             } catch (IOException e) {
                 System.out.println("파일 생성 오류: " + e.getMessage());
             }
@@ -37,13 +50,15 @@ public class UserDAO {
             return false;
         }
 
-        if (password.length() != 7) {
-            System.out.println("비밀번호는 7자리여야 합니다: " + password);
+        if (password.length() < 4 || password.length() > 8) {
+            System.out.println("비밀번호는 4자리 이상 8자리 이하이어야 합니다: " + password);
             return false;
         }
 
         String fileName = getFileNameByUserId(userId);
-        if (fileName == null) return false;
+        if (fileName == null) {
+            return false;
+        }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
@@ -65,10 +80,12 @@ public class UserDAO {
         return false;
     }
 
-    // 🔥 추가: userId가 이미 존재하는지 확인
+    // userId가 이미 존재하는지 확인
     public boolean isUserIdExists(String userId) {
         String fileName = getFileNameByUserId(userId);
-        if (fileName == null) return false;
+        if (fileName == null) {
+            return false;
+        }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
@@ -77,7 +94,7 @@ public class UserDAO {
                 if (tokens.length >= 2) {
                     String storedId = tokens[1].trim();
                     if (storedId.equals(userId)) {
-                        return true; // 이미 존재
+                        return true;
                     }
                 }
             }
@@ -88,10 +105,12 @@ public class UserDAO {
         return false;
     }
 
-    // userId로 이름 가져오기
+    // 이름 가져오기
     public String getUserNameById(String userId) {
         String fileName = getFileNameByUserId(userId);
-        if (fileName == null) return null;
+        if (fileName == null) {
+            return null;
+        }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
@@ -100,7 +119,7 @@ public class UserDAO {
                 if (tokens.length >= 3) {
                     String storedId = tokens[1].trim();
                     if (storedId.equals(userId)) {
-                        return tokens[0].trim(); // 이름 반환
+                        return tokens[0].trim();
                     }
                 }
             }
@@ -120,13 +139,15 @@ public class UserDAO {
             return;
         }
 
-        if (user.getPassword().length() != 7) {
-            JOptionPane.showMessageDialog(null, "비밀번호는 7자리여야 합니다: " + user.getPassword());
+        if (user.getPassword().length() < 4 || user.getPassword().length() > 8) {
+            JOptionPane.showMessageDialog(null, "비밀번호는 4자리 이상 8자리 이하로 입력해주세요.");
             return;
         }
 
         String fileName = getFileNameByUserId(userId);
-        if (fileName == null) return;
+        if (fileName == null) {
+            return;
+        }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
             writer.write(name + "," + userId + "," + user.getPassword());
@@ -137,7 +158,7 @@ public class UserDAO {
         }
     }
 
-    // 파일명 구하는 메서드
+    // 파일명 반환
     private String getFileNameByUserId(String userId) {
         String firstLetter = userId.substring(0, 1);
 
@@ -154,8 +175,8 @@ public class UserDAO {
         }
     }
 
-    // 아이디(학번) 유효성 검사
+    // 학번 유효성 검사
     private boolean isValidId(String userId) {
-        return userId.matches("[SPA][0-9]{3}"); // 문자 1개 + 숫자 3자리
+        return userId.matches("[SPA][0-9]{3}"); // 문자 + 숫자 3자리
     }
 }

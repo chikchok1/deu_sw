@@ -39,11 +39,11 @@ public class MembershipController {
                 }
 
                 if (!isValidPassword(password)) {
-                    view.showMessage("비밀번호는 주민등록번호 뒷자리 7자리여야 합니다.");
+                    view.showMessage("비밀번호는 최소 4자리에서 최대 8자리여야 합니다.");
                     return;
                 }
 
-                // 🔥 여기 추가: 중복 아이디 검사
+                //  중복 아이디 검사
                 if (userDAO.isUserIdExists(studentId)) {
                     view.showMessage("이미 존재하는 학번입니다. 다른 학번을 사용해주세요.");
                     return;
@@ -70,8 +70,9 @@ public class MembershipController {
         return userId.matches("[SPA][0-9]{3}");
     }
 
-    // 비밀번호(주민등록번호 뒷자리 7자리) 유효성 검사
-    private boolean isValidPassword(String password) {
-        return password.matches("\\d{7}");
-    }
+    // 비밀번호 유효성 검사 (최소 4자리, 최대 8자리, 문자 포함 가능)
+private boolean isValidPassword(String password) {
+    return password.length() >= 4 && password.length() <= 8;
+}
+
 }
