@@ -9,14 +9,17 @@ public class UserDAO {
     private static final String USER_FILE = DATA_FOLDER + "/users.txt";
     private static final String PROF_FILE = DATA_FOLDER + "/prof.txt";
     private static final String ASSISTANT_FILE = DATA_FOLDER + "/assistant.txt";
-    private static final String RESERVE_FILE = DATA_FOLDER + "/ReserveClass.txt"; 
+    private static final String RESERVE_FILE = DATA_FOLDER + "/ReserveClass.txt";
+    private static final String RESERVELAB_FILE = DATA_FOLDER + "/ReserveLab.txt";
 
     public UserDAO() {
         createDataFolderIfNotExists();
         createFileIfNotExists(USER_FILE);
         createFileIfNotExists(PROF_FILE);
         createFileIfNotExists(ASSISTANT_FILE);
-        createFileIfNotExists(RESERVE_FILE); 
+        createFileIfNotExists(RESERVE_FILE);
+        createFileIfNotExists(RESERVELAB_FILE);
+
     }
 
     //  data 폴더 없으면 생성

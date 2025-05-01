@@ -39,27 +39,23 @@ public class LoginController {
 
 
     private void openUserMainView(char userType) {
-        switch (userType) {
-            case 'S':
-                RoomSelect roomSelect = new RoomSelect();
-                new RoomSelectController(roomSelect);
-                roomSelect.setVisible(true);
-                break;
-            case 'P':
-                ProfessorMainView professorMainView = new ProfessorMainView();
-                new ProfessorMainController(professorMainView);
-                professorMainView.setVisible(true);
-                break;
-            case 'A':
-                AssistantMainView assistantMainView = new AssistantMainView();
-                new AssistantMainController(assistantMainView);
-                assistantMainView.setVisible(true);
-                break;
-            default:
-                System.out.println("알 수 없는 사용자 타입: " + userType);
-                break;
-        }
+    switch (userType) {
+        case 'S': // 학생
+        case 'P': // 교수도 같은 화면으로 이동
+            RoomSelect roomSelect = new RoomSelect();
+            new RoomSelectController(roomSelect);
+            roomSelect.setVisible(true);
+            break;
+        case 'A': // 조교
+            AssistantMainView assistantMainView = new AssistantMainView();
+            new AssistantMainController(assistantMainView);
+            assistantMainView.setVisible(true);
+            break;
+        default:
+            System.out.println("알 수 없는 사용자 타입: " + userType);
+            break;
     }
+}
 
     private void openMembership() {
         if (membershipView == null || !membershipView.isVisible()) {

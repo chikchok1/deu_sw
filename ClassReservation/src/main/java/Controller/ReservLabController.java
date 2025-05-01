@@ -10,6 +10,7 @@ package Controller;
  */
 import Model.Session;
 import View.ReservClassView;
+import View.ReservLabView;
 import View.RoomSelect;
 
 import java.awt.event.ActionEvent;
@@ -19,12 +20,12 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 
-public class ReservClassController {
+public class ReservLabController {
 
-    private ReservClassView view;
+    private ReservLabView view;
 
     // 생성자: View와 컨트롤러를 연결하고 버튼 리스너를 초기화
-    public ReservClassController(ReservClassView view) {
+    public ReservLabController(ReservLabView view) {
         this.view = view;
         this.view.resetReservationButtonListener(); // 기존 리스너 초기화
         this.view.addReservationListener(new ReservationListener()); // 새로운 리스너 등록
@@ -48,9 +49,9 @@ public class ReservClassController {
                     return;
                 }
 
-                // 같은 요일, 시간, 강의실에 예약이 존재하는지 확인
+                // 같은 요일, 시간, 실습실에 예약이 존재하는지 확인
                 if (isDuplicateReservation(selectedClassRoom, selectedDay, selectedTime)) {
-                    view.showMessage("이미 같은 강의실, 요일 및 시간에 예약이 존재합니다.");
+                    view.showMessage("이미 같은 실습실, 요일 및 시간에 예약이 존재합니다.");
                     return;
                 }
 
@@ -74,7 +75,7 @@ public class ReservClassController {
 
         // 중복 예약 확인 메서드 (강의실, 요일, 시간 조건 포함)
         private boolean isDuplicateReservation(String classRoom, String day, String time) {
-            try (BufferedReader reader = new BufferedReader(new FileReader("data/ReserveClass.txt"))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader("data/ReserveLab.txt"))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] tokens = line.split(",");
@@ -96,7 +97,7 @@ public class ReservClassController {
         }
 
         private void addReservationToFile(String userName, String room, String day, String time, String purpose) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/ReserveClass.txt", true))) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/ReserveLab.txt", true))) {
                 // 사용자 구분 가져오기 (예: S123 → 학생)
                 String userType = "알 수 없음";
                 String userId = Session.getLoggedInUserId();
