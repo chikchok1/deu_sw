@@ -4,10 +4,6 @@
  */
 package View;
 
-import Model.Session;
-import java.io.BufferedReader;
-import java.io.FileReader;
-
 /**
  *
  * @author YangJinWon
@@ -18,120 +14,51 @@ public class ReservedRoomView extends javax.swing.JFrame {
         initComponents();
 
     }
-
-    private void loadReservedRooms(String selectedRoom) {
-        try {
-            String userId = Session.getLoggedInUserId();
-            if (userId == null || userId.isEmpty()) {
-                return;
-            }
-
-            char userType = userId.charAt(0); // 'S', 'P', 'A'
-            String userName = Session.getLoggedInUserName(); // 예약자 이름 확인용
-
-            // 테이블 초기화
-            for (int row = 0; row < jTable1.getRowCount(); row++) {
-                for (int col = 1; col < jTable1.getColumnCount(); col++) {
-                    jTable1.setValueAt("", row, col);
-                }
-            }
-
-            // 두 개의 예약 파일을 모두 처리
-            loadFromFile("data/ReserveClass.txt", selectedRoom, userType, userName);
-            loadFromFile("data/ReserveLab.txt", selectedRoom, userType, userName);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loadFromFile(String filePath, String selectedRoom, char userType, String userName) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length < 5) {
-                    continue;
-                }
-
-                String name = parts[0].trim();
-                String room = parts[1].trim();
-                String day = parts[2].trim();
-                String period = parts[3].trim();
-                String purpose = parts[4].trim();
-
-                // 선택된 강의실 필터
-                if (!selectedRoom.equals("선택") && !room.equals(selectedRoom)) {
-                    continue;
-                }
-
-                // 학생일 경우, 자신의 예약이 아니면 continue
-                if (userType == 'S' && !name.equals(userName)) {
-                    continue;
-                }
-
-                int col = getDayColumn(day);
-                int row = getPeriodRow(period);
-
-                if (col != -1 && row != -1) {
-                    String displayText = (userType == 'S') ? "예약됨" : name;
-
-                    String current = (String) jTable1.getValueAt(row, col);
-                    if (current == null || current.isEmpty()) {
-                        jTable1.setValueAt(displayText, row, col);
-                    } else if (!current.contains(displayText)) {
-                        jTable1.setValueAt(current + ", " + displayText, row, col);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private int getDayColumn(String day) {
-        switch (day) {
-            case "월요일":
-                return 1;
-            case "화요일":
-                return 2;
-            case "수요일":
-                return 3;
-            case "목요일":
-                return 4;
-            case "금요일":
-                return 5;
-            default:
-                return -1;
-        }
-    }
-
-    private int getPeriodRow(String period) {
-        switch (period) {
-            case "1교시(09:00~10:00)":
-                return 0;
-            case "2교시(10:00~11:00)":
-                return 1;
-            case "3교시(11:00~12:00)":
-                return 2;
-            case "4교시(12:00~13:00)":
-                return 3;
-            case "5교시(13:00~14:00)":
-                return 4;
-            case "6교시(14:00~15:00)":
-                return 5;
-            case "7교시(15:00~16:00)":
-                return 6;
-            case "8교시(16:00~17:00)":
-                return 7;
-            case "9교시(17:00~18:00)":
-                return 8;
-            default:
-                return -1;
-        }
-    }
 private boolean isUpdating = false;
 
+// ↓ View 요소에 접근할 수 있는 Getter 메서드들
+    public javax.swing.JComboBox<String> getClassComboBox() {
+        return Class;
+    }
+
+    public javax.swing.JComboBox<String> getLabComboBox() {
+        return Lab;
+    }
+
+    public javax.swing.JButton getCheckButton() {
+        return Check;
+    }
+
+    public javax.swing.JButton getBeforeButton() {
+        return Before;
+    }
+
+    public javax.swing.JTable getTable() {
+        return jTable1;
+    }
+
+    public boolean isUpdating() {
+        return isUpdating;
+    }
+
+    public void setUpdating(boolean updating) {
+        this.isUpdating = updating;
+    }
+
+    public String getSelectedRoom() {
+        String classRoom = (String) Class.getSelectedItem();
+        String labRoom = (String) Lab.getSelectedItem();
+        return !"선택".equals(classRoom) ? classRoom : labRoom;
+    }
+
+    public void resetClassSelection() {
+        Class.setSelectedItem("선택");
+    }
+
+    public void resetLabSelection() {
+        Lab.setSelectedItem("선택");
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -264,48 +191,19 @@ private boolean isUpdating = false;
     }// </editor-fold>//GEN-END:initComponents
 
     private void CheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CheckActionPerformed
-        String selectedRoom = (String) Class.getSelectedItem();
-        loadReservedRooms(selectedRoom);
+     
     }//GEN-LAST:event_CheckActionPerformed
 
     private void ClassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ClassActionPerformed
-        if (isUpdating) {
-            return; // 무한 호출 방지
-        }
-        isUpdating = true;
-
-        Lab.setSelectedItem("선택"); // 실습실 초기화
-        String selectedRoom = (String) Class.getSelectedItem();
-        if (!"선택".equals(selectedRoom)) {
-            loadReservedRooms(selectedRoom);
-        }
-
-        isUpdating = false;
+      
     }//GEN-LAST:event_ClassActionPerformed
 
     private void LabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LabActionPerformed
-        if (isUpdating) {
-            return; // 무한 호출 방지
-        }
-        isUpdating = true;
-
-        Class.setSelectedItem("선택"); // 강의실 초기화
-        String selectedRoom = (String) Lab.getSelectedItem();
-        if (!"선택".equals(selectedRoom)) {
-            loadReservedRooms(selectedRoom);
-        }
-
-        isUpdating = false;
+    
     }//GEN-LAST:event_LabActionPerformed
 
     private void BeforeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BeforeActionPerformed
-        // TODO add your handling code here:
-        dispose(); // 현재 창 닫기
-
-        // RoomSelect 창 열기
-        RoomSelect roomSelect = new RoomSelect();
-        new Controller.RoomSelectController(roomSelect); // 컨트롤러 연결 (필요 시)
-        roomSelect.setVisible(true);
+      
     }//GEN-LAST:event_BeforeActionPerformed
 
     /**
@@ -333,6 +231,12 @@ private boolean isUpdating = false;
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(ReservedRoomView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
 
