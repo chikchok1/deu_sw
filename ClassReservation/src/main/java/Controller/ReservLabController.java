@@ -9,7 +9,6 @@ package Controller;
  * @author YangJinWon
  */
 import Model.Session;
-import View.ReservClassView;
 import View.ReservLabView;
 import View.RoomSelect;
 
@@ -29,6 +28,14 @@ public class ReservLabController {
         this.view = view;
         this.view.resetReservationButtonListener(); // 기존 리스너 초기화
         this.view.addReservationListener(new ReservationListener()); // 새로운 리스너 등록
+
+        // 이전 버튼 리스너 등록
+        this.view.getBeforeButton().addActionListener(e -> {
+            view.dispose();
+            RoomSelect roomSelect = new RoomSelect();
+            new RoomSelectController(roomSelect);
+            roomSelect.setVisible(true);
+        });
     }
 
     class ReservationListener implements ActionListener {
