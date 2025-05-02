@@ -4,18 +4,6 @@
  */
 package View;
 
-import Controller.RoomSelectController;
-import Model.Session;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.swing.JOptionPane;
-
 /**
  *
  * @author YangJinWon
@@ -23,12 +11,24 @@ import javax.swing.JOptionPane;
 public class ChangePasswordView extends javax.swing.JFrame {
 
     public ChangePasswordView() {
-        initComponents();  // ← 이게 반드시 있어야 함!
+        initComponents();  
     }
 
-    /**
-     * Creates new form ChangePassword
-     */
+// 비밀번호 값 가져오는 getter 추가
+
+    public String getPresentPassword() {
+        return PresentPassword.getText();
+    }
+
+    public String getChangePassword() {
+        return ChangePassword.getText();
+    }
+
+// 버튼 리스너 등록 메서드
+    public void setSaveButtonListener(java.awt.event.ActionListener listener) {
+        Save.addActionListener(listener);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -127,78 +127,7 @@ public class ChangePasswordView extends javax.swing.JFrame {
     }//GEN-LAST:event_ChangePasswordActionPerformed
 
     private void SaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveActionPerformed
-        String currentPassword = PresentPassword.getText().trim();
-        String newPassword = ChangePassword.getText().trim();
-        String userId = Session.getLoggedInUserId();
 
-        if (currentPassword.isEmpty() || newPassword.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "모든 필드를 입력해주세요.");
-            return;
-        }
-
-        String filePath;
-        char userType = userId.charAt(0); // S, P, A
-
-        switch (userType) {
-            case 'S':
-                filePath = "data/users.txt";
-                break;
-            case 'P':
-                filePath = "data/prof.txt";
-                break;
-            case 'A':
-                filePath = "data/assistant.txt";
-                break;
-            default:
-                JOptionPane.showMessageDialog(this, "유효하지 않은 사용자입니다.");
-                return;
-        }
-
-        try {
-            File file = new File(filePath);
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            List<String> lines = new ArrayList<>();
-            boolean updated = false;
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 3 && parts[1].equals(userId)) {
-                    if (!parts[2].equals(currentPassword)) {
-                        JOptionPane.showMessageDialog(this, "현재 비밀번호가 일치하지 않습니다.");
-                        reader.close();
-                        return;
-                    }
-                    line = parts[0] + "," + parts[1] + "," + newPassword;
-                    updated = true;
-                }
-                lines.add(line);
-            }
-            reader.close();
-
-            if (!updated) {
-                JOptionPane.showMessageDialog(this, "사용자 정보를 찾을 수 없습니다.");
-                return;
-            }
-
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            for (String l : lines) {
-                writer.write(l);
-                writer.newLine();
-            }
-            writer.close();
-
-            JOptionPane.showMessageDialog(this, "비밀번호가 성공적으로 변경되었습니다.");
-            RoomSelect roomSelect = new RoomSelect();
-            new RoomSelectController(roomSelect);
-            roomSelect.setVisible(true);
-            
-            dispose(); // 창 닫기
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "오류 발생: " + e.getMessage());
-        }
     }//GEN-LAST:event_SaveActionPerformed
 
     /**

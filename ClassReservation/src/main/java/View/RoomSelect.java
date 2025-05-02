@@ -57,6 +57,13 @@ public class RoomSelect extends javax.swing.JFrame {
         LogOut.addActionListener(listener);
     }
 
+    public void setChangePasswordActionListener(java.awt.event.ActionListener listener) {
+        for (java.awt.event.ActionListener al : ChangePassword.getActionListeners()) {
+            ChangePassword.removeActionListener(al);
+        }
+        ChangePassword.addActionListener(listener);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -178,13 +185,7 @@ public class RoomSelect extends javax.swing.JFrame {
     }//GEN-LAST:event_LogOutActionPerformed
 
     private void ChangePasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ChangePasswordActionPerformed
-        // TODO add your handling code here:
-        // ChangePasswordView 창 열기
-        View.ChangePasswordView changePasswordView = new View.ChangePasswordView();
-        changePasswordView.setVisible(true);
 
-        // 현재 RoomSelect 창 닫기 (선택 사항)
-        this.dispose(); // 또는 setVisible(false);
     }//GEN-LAST:event_ChangePasswordActionPerformed
     /**
      * @param args the command line arguments

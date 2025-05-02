@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.UserDAO;
+import View.ChangePasswordView;
 import View.RoomSelect;
 import View.ReservClassView;
 import View.ReservLabView;
@@ -19,6 +20,14 @@ public class RoomSelectController {
         this.view.setLabButtonActionListener(e -> openReservLab());
         this.view.setViewReservedActionListener(e -> openReservedClassRoom());
         this.view.setLogOutButtonActionListener(e -> handleLogout());
+        this.view.setChangePasswordActionListener(e -> openChangePasswordView());
+    }
+
+    private void openChangePasswordView() {
+        ChangePasswordView changePasswordView = new ChangePasswordView();
+        new ChangePasswordController(changePasswordView);
+        changePasswordView.setVisible(true);
+        view.dispose();
     }
 
     private void openReservClass() {
