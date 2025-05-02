@@ -36,7 +36,9 @@ public class RoomSelectController {
     }
 
     private void openReservedClassRoom() {
-        new ReservedRoomView().setVisible(true);
+        ReservedRoomView reservedRoomView = new ReservedRoomView();          // View 생성
+        new ReservedRoomController(reservedRoomView);                // Controller 연결
+        reservedRoomView.setVisible(true);                           // 화면에 보여줌
         view.dispose();
     }
 
