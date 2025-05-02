@@ -47,10 +47,8 @@ public class LoginController {
             roomSelect.setVisible(true);
             break;
         case 'A': // 조교
-            AssistantMainView assistantMainView = new AssistantMainView();
-            new AssistantMainController(assistantMainView);
-            assistantMainView.setVisible(true);
-            break;
+            
+   //기능 구현해야함
         default:
             System.out.println("알 수 없는 사용자 타입: " + userType);
             break;
