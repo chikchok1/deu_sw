@@ -5,6 +5,7 @@ import Model.UserDAO;
 import Model.Session; // 추가: Session 가져오기
 import View.*;
 
+
 public class LoginController {
     private LoginForm view;
     private UserDAO dao;
@@ -48,7 +49,8 @@ public class LoginController {
             break;
         case 'A': // 조교
             Executive executive = new Executive();
-            executive.setVisible(true);
+    new ExecutiveController(executive); // 버튼 기능 연결
+    executive.setVisible(true);   
             break;
    
         default:
