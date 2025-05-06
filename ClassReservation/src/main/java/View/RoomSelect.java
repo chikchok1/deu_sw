@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package View;
+import Controller.ReservationchangeviewController;
 
 /**
  *
@@ -15,6 +16,16 @@ public class RoomSelect extends javax.swing.JFrame {
      */
     public RoomSelect() {
         initComponents();
+        // RoomSelect.java
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+    public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton1ActionPerformed(evt);
+    }
+});
+
+
+
+
     }
 
     public javax.swing.JButton getClassButton() {
@@ -228,6 +239,11 @@ public class RoomSelect extends javax.swing.JFrame {
             }
         });
     }
+   private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
+    View.Reservationchangeview changeView = new View.Reservationchangeview();
+    new Controller.ReservationchangeviewController(changeView);
+    changeView.setVisible(true);
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton ChangePassword;

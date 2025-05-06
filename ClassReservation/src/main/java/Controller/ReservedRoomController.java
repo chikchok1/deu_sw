@@ -53,9 +53,16 @@ public class ReservedRoomController {
         // [4] 이전 버튼 클릭 시
         view.getBeforeButton().addActionListener(e -> {
             view.dispose();
-            RoomSelect roomSelect = new RoomSelect();
-            new RoomSelectController(roomSelect);
-            roomSelect.setVisible(true);
+            char userType = Session.getLoggedInUserId().charAt(0);
+            if (userType == 'E') {
+                Executive executive = new Executive();
+                new ExecutiveController(executive);
+                executive.setVisible(true);
+            } else {
+                RoomSelect roomSelect = new RoomSelect();
+                new RoomSelectController(roomSelect);
+                roomSelect.setVisible(true);
+            }
         });
     }
 

@@ -49,6 +49,9 @@ public class ClassroomReservationApproval extends javax.swing.JFrame {
             }
         ));
         jScrollPane2.setViewportView(jTable2);
+        if (jTable2.getColumnModel().getColumnCount() > 0) {
+            jTable2.getColumnModel().getColumn(0).setHeaderValue("예약ID");
+        }
 
         jScrollPane1.setViewportView(jScrollPane2);
 
@@ -138,6 +141,18 @@ public class ClassroomReservationApproval extends javax.swing.JFrame {
             }
         });
     }
+public javax.swing.JTable getTable() {
+    return jTable2;
+}
+
+
+
+public javax.swing.JButton getApproveButton() {
+    return jButton1;
+}
+public javax.swing.JButton getRejectButton() {
+    return jButton2;
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;

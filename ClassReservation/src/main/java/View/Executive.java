@@ -15,6 +15,13 @@ public class Executive extends javax.swing.JFrame {
      */
     public Executive() {
         initComponents();
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+    public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton5ActionPerformed(evt);
+    }
+});
+
+        
     }
 
     /**
@@ -139,6 +146,11 @@ public class Executive extends javax.swing.JFrame {
     }
 public javax.swing.JButton getViewReservedButton() {
     return jButton1;
+}
+private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {
+    View.ClassroomReservationApproval approvalView = new View.ClassroomReservationApproval();
+    new Controller.ClassroomReservationApprovalController(approvalView);
+    approvalView.setVisible(true);
 }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
