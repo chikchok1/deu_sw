@@ -13,7 +13,8 @@ public class LoginServer {
         UserDAO userDAO = new UserDAO();
 
         try {
-            serverSocket = new ServerSocket(5000);
+            // 모든 IP로부터 수신 가능하게 함
+            serverSocket = new ServerSocket(5000, 50, InetAddress.getByName("0.0.0.0"));
             System.out.println("서버 시작: 포트 5000");
 
             while (running) {
