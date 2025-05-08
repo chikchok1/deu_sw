@@ -41,7 +41,7 @@ public class MembershipController {
                 }
 
                 try (
-                    Socket socket = new Socket("localhost", 5000);
+                    Socket socket = new Socket("180.182.66.71", 5000);
                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 ) {
