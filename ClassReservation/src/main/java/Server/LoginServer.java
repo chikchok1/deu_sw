@@ -65,6 +65,35 @@ public class LoginServer {
                 } else {
                     out.println("INVALID_FORMAT");
                 }
+            } else if (request.startsWith("RESERVE_CLASS") || request.startsWith("RESERVE_LAB")) {
+                String[] parts = request.split(",", 8);
+                if (parts.length != 8) {
+                    out.println("INVALID_FORMAT");
+                    return;
+                }
+
+                String type = parts[0];
+                String fileName = type.equals("RESERVE_CLASS") ? "data/ReserveClass.txt" : "data/ReserveLab.txt";
+
+                String userName = parts[1];
+                String room = parts[2];
+                String day = parts[3];
+                String time = parts[4];
+                String purpose = parts[5];
+                String userId = parts[6];
+                String userType = getUserType(userId);
+
+                if (isDuplicate(fileName, room, day, time)) {
+                    out.println("DUPLICATE");
+                    return;
+                }
+
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+                    writer.write(userName + "," + room + "," + day + "," + time + "," + purpose + "," + userType + ",예약됨");
+                    writer.newLine();
+                }
+
+                out.println("SUCCESS");
             } else {
                 out.println("UNKNOWN_COMMAND");
             }
@@ -72,5 +101,29 @@ public class LoginServer {
             System.out.println("클라이언트 처리 오류: " + e.getMessage());
         }
     }
-}
 
+    private static boolean isDuplicate(String fileName, String room, String day, String time) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 4 && tokens[1].equals(room) && tokens[2].equals(day) && tokens[3].equals(time)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private static String getUserType(String userId) {
+        if (userId == null || userId.isEmpty()) return "알 수 없음";
+        switch (userId.charAt(0)) {
+            case 'S': return "학생";
+            case 'P': return "교수";
+            case 'A': return "조교";
+            default: return "알 수 없음";
+        }
+    }
+}
