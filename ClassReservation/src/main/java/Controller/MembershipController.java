@@ -1,26 +1,23 @@
 package Controller;
 
 import Model.MembershipModel;
-import Model.User;
-import Model.UserDAO;
 import View.LoginForm;
 import View.MembershipView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
+import java.net.Socket;
 
 public class MembershipController {
     private MembershipView view;
     private MembershipModel model;
     private LoginForm loginForm;
-    private UserDAO userDAO;
 
-    public MembershipController(MembershipView view, MembershipModel model, LoginForm loginForm, UserDAO userDAO) {
+    public MembershipController(MembershipView view, MembershipModel model, LoginForm loginForm) {
         this.view = view;
         this.model = model;
         this.loginForm = loginForm;
-        this.userDAO = userDAO;
 
-        // 회원가입 버튼 리스너 등록
         this.view.setCustomActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -43,36 +40,35 @@ public class MembershipController {
                     return;
                 }
 
-                //  중복 아이디 검사
-                if (userDAO.isUserIdExists(studentId)) {
-                    view.showMessage("이미 존재하는 학번입니다. 다른 학번을 사용해주세요.");
-                    return;
+                try (
+                    Socket socket = new Socket("localhost", 5000);
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                ) {
+                    out.println("REGISTER," + name + "," + studentId + "," + password);
+                    String response = in.readLine();
+
+                    if ("SUCCESS".equals(response)) {
+                        view.showMessage("회원가입이 완료되었습니다.");
+                        view.disposeView();
+                        loginForm.setVisible(true);
+                    } else if ("DUPLICATE".equals(response)) {
+                        view.showMessage("이미 존재하는 학번입니다. 다른 학번을 사용해주세요.");
+                    } else {
+                        view.showMessage("회원가입 실패: " + response);
+                    }
+                } catch (IOException ex) {
+                    view.showMessage("서버와 연결할 수 없습니다: " + ex.getMessage());
                 }
-
-                // 모델에 정보 저장
-                model.setName(name);
-                model.setStudentId(studentId);
-                model.setPassword(password);
-
-                // DAO를 이용해 파일에 저장
-                User user = new User(studentId, password);
-                userDAO.registerUser(user, name);
-
-                view.showMessage("회원가입이 완료되었습니다.");
-                view.disposeView();
-                loginForm.setVisible(true);
             }
         });
     }
 
-    // 아이디(학번) 유효성 검사
     private boolean isValidId(String userId) {
         return userId.matches("[SPA][0-9]{3}");
     }
 
-    // 비밀번호 유효성 검사 (최소 4자리, 최대 8자리, 문자 포함 가능)
-private boolean isValidPassword(String password) {
-    return password.length() >= 4 && password.length() <= 8;
-}
-
+    private boolean isValidPassword(String password) {
+        return password.length() >= 4 && password.length() <= 8;
+    }
 }

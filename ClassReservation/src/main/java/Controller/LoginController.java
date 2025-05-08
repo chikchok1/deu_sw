@@ -4,6 +4,11 @@ import Model.MembershipModel;
 import Model.UserDAO;
 import Model.Session; // 추가: Session 가져오기
 import View.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 
 public class LoginController {
@@ -19,24 +24,39 @@ public class LoginController {
         this.view.addJoinListener(e -> openMembership());
     }
 
-    private void handleLogin() {
+  private void handleLogin() {
     String id = view.getUserId();
     String password = view.getPassword();
 
-    if (dao.validateUser(id, password)) {
-        view.showMessage("로그인 성공!");
+    try (
+        Socket socket = new Socket("localhost", 5000);
+        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    ) {
+        // 서버에 로그인 요청 전송
+        out.println("LOGIN," + id + "," + password);
 
-        // 로그인 성공하면 세션에 ID, 이름 저장
-        Session.setLoggedInUserId(id);
-        String userName = dao.getUserNameById(id);
-        Session.setLoggedInUserName(userName);
+        // 서버 응답 처리
+        String response = in.readLine();
+        if (response != null && response.startsWith("SUCCESS")) {
+            String[] parts = response.split(",", 2);
+            String userName = parts.length > 1 ? parts[1] : "이름없음";
 
-        view.dispose();
-        openUserMainView(id.charAt(0));  // ID 첫 글자만 넘겨서 분기
-    } else {
-        view.showMessage("아이디 또는 비밀번호가 틀렸습니다.");
+            // 세션 저장
+            Session.setLoggedInUserId(id);
+            Session.setLoggedInUserName(userName);
+
+            view.showMessage("로그인 성공!");
+            view.dispose();
+            openUserMainView(id.charAt(0));
+        } else {
+            view.showMessage("로그인 실패: 아이디 또는 비밀번호가 틀렸습니다.");
+        }
+    } catch (IOException e) {
+        view.showMessage("서버와 연결할 수 없습니다: " + e.getMessage());
     }
 }
+
 
 
     private void openUserMainView(char userType) {
@@ -64,7 +84,7 @@ public class LoginController {
             membershipView = new MembershipView();
             MembershipModel membershipModel = new MembershipModel();
 
-            new MembershipController(membershipView, membershipModel, view, dao);
+            new MembershipController(membershipView, membershipModel, view);
 
             view.setVisible(false);
             membershipView.setVisible(true);
