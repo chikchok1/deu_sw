@@ -57,12 +57,23 @@ public class ReservedRoomController {
         });
 
         // [4] 이전 버튼 클릭 시
-        view.getBeforeButton().addActionListener(e -> {
-            view.dispose();
-            RoomSelect roomSelect = new RoomSelect();
-            new RoomSelectController(roomSelect);
-            roomSelect.setVisible(true);
-        });
+// [4] 이전 버튼 클릭 시
+view.getBeforeButton().addActionListener(e -> {
+    view.dispose();
+    String userId = Session.getLoggedInUserId();
+
+    if (userId != null && userId.startsWith("A")) {
+        // 조교일 경우 Executive로 이동
+        View.Executive executive = new View.Executive();
+        new Controller.ExecutiveController(executive);
+        executive.setVisible(true);
+    } else {
+        // 일반 사용자일 경우 RoomSelect로 이동
+        RoomSelect roomSelect = new RoomSelect();
+        new RoomSelectController(roomSelect);
+        roomSelect.setVisible(true);
+    }
+});
     }
 
     /*
