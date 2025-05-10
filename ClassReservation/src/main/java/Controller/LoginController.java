@@ -17,8 +17,11 @@ public class LoginController {
         this.view.addLoginListener(e -> handleLogin());
         this.view.addJoinListener(e -> openMembership());
     }
-
-    private void handleLogin() {
+    
+ /**
+ * [테스트 용도로만 public 처리함]
+ */  
+public void handleLogin() {
     String id = view.getUserId();
     String password = view.getPassword();
 
