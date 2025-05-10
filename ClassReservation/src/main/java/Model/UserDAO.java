@@ -97,6 +97,17 @@ public class UserDAO {
         }
         return null;
     }
+    
+    // [추가됨] 접근 권한 판단 함수
+    public boolean authorizeAccess(String userId) {
+        if (userId == null || userId.isEmpty()) {
+            System.out.println("유효하지 않은 사용자 ID입니다.");
+            return false;
+        }
+
+        char role = userId.charAt(0);
+        return role == 'P' || role == 'A'; // 교수 또는 조교만 true 반환
+    }
 
     private String getFileNameByUserId(String userId) {
         if (userId.startsWith("S")) return USER_FILE;

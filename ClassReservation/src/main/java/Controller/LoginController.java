@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import utils.ConfigLoader;
 
 public class LoginController {
 
@@ -27,12 +28,15 @@ public class LoginController {
     private void handleLogin() {
         String id = view.getUserId();
         String password = view.getPassword();
+        
+         String serverIp = ConfigLoader.getProperty("server.ip");
+    int serverPort = Integer.parseInt(ConfigLoader.getProperty("server.port"));
 
         try (
-                Socket socket = new Socket("180.182.66.71", 5000); 
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true); BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));) {
-            // 서버에 로그인 요청 전송
-            out.println("LOGIN," + id + "," + password);
+                Socket socket = new Socket(serverIp, serverPort);
+        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                ){   out.println("LOGIN," + id + "," + password);
 
             // 서버 응답 처리
             String response = in.readLine();

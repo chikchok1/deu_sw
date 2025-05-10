@@ -32,6 +32,8 @@ public class LoginServer {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)
         ) {
             String request = in.readLine();
+                    System.out.println("수신된 요청: " + request); // 디버그 로그
+
             if (request == null) return;
 
             if (request.equalsIgnoreCase("SHUTDOWN")) {
@@ -42,6 +44,8 @@ public class LoginServer {
             }
 
             if (request.startsWith("LOGIN")) {
+                            System.out.println("로그인 요청 처리");
+
                 String[] parts = request.split(",");
                 if (parts.length == 3) {
                     boolean valid = userDAO.validateUser(parts[1], parts[2]);
@@ -53,9 +57,15 @@ public class LoginServer {
                     }
                 } else {
                     out.println("INVALID_FORMAT");
+                                    System.out.println("REGISTER 요청 포맷 오류");
+
                 }
             } else if (request.startsWith("REGISTER")) {
+                            System.out.println("회원가입 요청 처리 시작");
+
                 String[] parts = request.split(",", 4);
+                            System.out.println("REGISTER 요청 파싱 결과: " + parts.length + "개");
+
                 if (parts.length == 4) {
                     if (userDAO.isUserIdExists(parts[2])) {
                         out.println("DUPLICATE");
@@ -97,6 +107,8 @@ public class LoginServer {
                 out.println("SUCCESS");
             } else {
                 out.println("UNKNOWN_COMMAND");
+                            System.out.println("알 수 없는 명령어 수신: " + request);
+
             }
         } catch (IOException e) {
             System.out.println("클라이언트 처리 오류: " + e.getMessage());
