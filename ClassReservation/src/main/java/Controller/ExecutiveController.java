@@ -1,11 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Controller;
 
 import View.Executive;
 import View.ReservedRoomView;
+import View.RoomAdmin;  // ← 이 줄 추가
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -16,23 +13,32 @@ public class ExecutiveController {
     public ExecutiveController(Executive executive) {
         this.executive = executive;
 
-        // 버튼에 이벤트 리스너 연결
+        // [1] "예약 확인" 버튼
         this.executive.getViewReservedButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 openReservedRoomView();
             }
         });
-        
+
+        // [2] "강의실 및 실습실 관리" 버튼 (jButton2)
+        this.executive.getJButton2().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openRoomAdminView();
+            }
+        });
     }
-    
-    
 
     private void openReservedRoomView() {
-    ReservedRoomView reservedView = new ReservedRoomView();
-    new ReservedRoomController(reservedView); // 컨트롤러 연결 추가
-    reservedView.setVisible(true);
-}
+        ReservedRoomView reservedView = new ReservedRoomView();
+        new ReservedRoomController(reservedView); // 컨트롤러 연결
+        reservedView.setVisible(true);
+    }
 
+    private void openRoomAdminView() {
+        RoomAdmin roomAdmin = new RoomAdmin();
+        new RoomAdminController(roomAdmin); // 컨트롤러 연결 (있다면)
+        roomAdmin.setVisible(true);
+    }
 }
-
