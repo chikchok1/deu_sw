@@ -243,6 +243,7 @@ public class RoomSelect extends javax.swing.JFrame {
     View.Reservationchangeview changeView = new View.Reservationchangeview();
     new Controller.ReservationchangeviewController(changeView);
     changeView.setVisible(true);
+     this.dispose(); // ✅ 현재 RoomSelect 창 닫기
 }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -151,6 +151,7 @@ private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {
     View.ClassroomReservationApproval approvalView = new View.ClassroomReservationApproval();
     new Controller.ClassroomReservationApprovalController(approvalView);
     approvalView.setVisible(true);
+     this.dispose(); // ✅ 현재 Executive 창 닫기
 }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
