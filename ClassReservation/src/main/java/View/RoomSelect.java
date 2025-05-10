@@ -14,6 +14,9 @@ public class RoomSelect extends javax.swing.JFrame {
      * Creates new form RoomSelect
      */
     public RoomSelect() {
+                    System.out.println("RoomSelect  인스턴스 생성됨");
+setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
+
         initComponents();
     }
 

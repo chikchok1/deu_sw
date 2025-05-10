@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.Socket;
+import utils.ConfigLoader;
 
 public class MembershipController {
     private MembershipView view;
@@ -40,13 +41,19 @@ public class MembershipController {
                     return;
                 }
 
+                String serverIp = ConfigLoader.getProperty("server.ip");
+                int serverPort = Integer.parseInt(ConfigLoader.getProperty("server.port"));
+
                 try (
-                    Socket socket = new Socket("180.182.66.71", 5000);
+                    Socket socket = new Socket(serverIp, serverPort);
                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 ) {
                     out.println("REGISTER," + name + "," + studentId + "," + password);
+                    System.out.println("REGISTER 요청 보냄");
+
                     String response = in.readLine();
+                    System.out.println("서버 응답 수신: " + response);
 
                     if ("SUCCESS".equals(response)) {
                         view.showMessage("회원가입이 완료되었습니다.");
