@@ -5,6 +5,7 @@ import Controller.LoginController;
 import Model.UserDAO;
 import View.LoginForm;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled; // @Disabled 어노테이션을 위한 import
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
