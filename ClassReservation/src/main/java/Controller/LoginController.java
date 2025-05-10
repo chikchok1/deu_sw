@@ -17,7 +17,8 @@ public class LoginController {
         this.view.addLoginListener(e -> handleLogin());
         this.view.addJoinListener(e -> openMembership());
     }
-    
+ // GitHub Actions 동작 확인용 커밋
+
  /**
  * [테스트 용도로만 public 처리함]
  */  
