@@ -1,26 +1,24 @@
 package Controller;
 
 import Model.MembershipModel;
-import Model.User;
-import Model.UserDAO;
 import View.LoginForm;
 import View.MembershipView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
+import java.net.Socket;
+import utils.ConfigLoader;
 
 public class MembershipController {
     private MembershipView view;
     private MembershipModel model;
     private LoginForm loginForm;
-    private UserDAO userDAO;
 
-    public MembershipController(MembershipView view, MembershipModel model, LoginForm loginForm, UserDAO userDAO) {
+    public MembershipController(MembershipView view, MembershipModel model, LoginForm loginForm) {
         this.view = view;
         this.model = model;
         this.loginForm = loginForm;
-        this.userDAO = userDAO;
 
-        // 회원가입 버튼 리스너 등록
         this.view.setCustomActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -39,39 +37,45 @@ public class MembershipController {
                 }
 
                 if (!isValidPassword(password)) {
-                    view.showMessage("비밀번호는 주민등록번호 뒷자리 7자리여야 합니다.");
+                    view.showMessage("비밀번호는 최소 4자리에서 최대 8자리여야 합니다.");
                     return;
                 }
 
-                // 🔥 여기 추가: 중복 아이디 검사
-                if (userDAO.isUserIdExists(studentId)) {
-                    view.showMessage("이미 존재하는 학번입니다. 다른 학번을 사용해주세요.");
-                    return;
+                String serverIp = ConfigLoader.getProperty("server.ip");
+                int serverPort = Integer.parseInt(ConfigLoader.getProperty("server.port"));
+
+                try (
+                    Socket socket = new Socket(serverIp, serverPort);
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                ) {
+                    out.println("REGISTER," + name + "," + studentId + "," + password);
+                    System.out.println("REGISTER 요청 보냄");
+
+                    String response = in.readLine();
+                    System.out.println("서버 응답 수신: " + response);
+
+                    if ("SUCCESS".equals(response)) {
+                        view.showMessage("회원가입이 완료되었습니다.");
+                        view.disposeView();
+                        loginForm.setVisible(true);
+                    } else if ("DUPLICATE".equals(response)) {
+                        view.showMessage("이미 존재하는 학번입니다. 다른 학번을 사용해주세요.");
+                    } else {
+                        view.showMessage("회원가입 실패: " + response);
+                    }
+                } catch (IOException ex) {
+                    view.showMessage("서버와 연결할 수 없습니다: " + ex.getMessage());
                 }
-
-                // 모델에 정보 저장
-                model.setName(name);
-                model.setStudentId(studentId);
-                model.setPassword(password);
-
-                // DAO를 이용해 파일에 저장
-                User user = new User(studentId, password);
-                userDAO.registerUser(user, name);
-
-                view.showMessage("회원가입이 완료되었습니다.");
-                view.disposeView();
-                loginForm.setVisible(true);
             }
         });
     }
 
-    // 아이디(학번) 유효성 검사
     private boolean isValidId(String userId) {
         return userId.matches("[SPA][0-9]{3}");
     }
 
-    // 비밀번호(주민등록번호 뒷자리 7자리) 유효성 검사
     private boolean isValidPassword(String password) {
-        return password.matches("\\d{7}");
+        return password.length() >= 4 && password.length() <= 8;
     }
 }

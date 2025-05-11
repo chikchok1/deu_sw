@@ -14,47 +14,58 @@ public class RoomSelect extends javax.swing.JFrame {
      * Creates new form RoomSelect
      */
     public RoomSelect() {
+        System.out.println("RoomSelect  인스턴스 생성됨");
+        setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
+
         initComponents();
     }
-    public javax.swing.JButton getClassButton() {
-    return Class;
-}
 
-public javax.swing.JButton getLabButton() {
-    return Lab;
-}
+    public javax.swing.JButton getClassButton() {
+        return Class;
+    }
+
+    public javax.swing.JButton getLabButton() {
+        return Lab;
+    }
 
 // ViewReserved 버튼에 리스너 추가
-public void setViewReservedActionListener(java.awt.event.ActionListener listener) {
-    for (java.awt.event.ActionListener al : ViewReserved.getActionListeners()) {
-        ViewReserved.removeActionListener(al);
+    public void setViewReservedActionListener(java.awt.event.ActionListener listener) {
+        for (java.awt.event.ActionListener al : ViewReserved.getActionListeners()) {
+            ViewReserved.removeActionListener(al);
+        }
+        ViewReserved.addActionListener(listener);
     }
-    ViewReserved.addActionListener(listener);
-}
 
 // Class 버튼
-public void setClassButtonActionListener(java.awt.event.ActionListener listener) {
-    for (java.awt.event.ActionListener al : Class.getActionListeners()) {
-        Class.removeActionListener(al);
+    public void setClassButtonActionListener(java.awt.event.ActionListener listener) {
+        for (java.awt.event.ActionListener al : Class.getActionListeners()) {
+            Class.removeActionListener(al);
+        }
+        Class.addActionListener(listener);
     }
-    Class.addActionListener(listener);
-}
 
 // Lab 버튼
-public void setLabButtonActionListener(java.awt.event.ActionListener listener) {
-    for (java.awt.event.ActionListener al : Lab.getActionListeners()) {
-        Lab.removeActionListener(al);
+    public void setLabButtonActionListener(java.awt.event.ActionListener listener) {
+        for (java.awt.event.ActionListener al : Lab.getActionListeners()) {
+            Lab.removeActionListener(al);
+        }
+        Lab.addActionListener(listener);
     }
-    Lab.addActionListener(listener);
-}
 
 // LogOut 버튼
-public void setLogOutButtonActionListener(java.awt.event.ActionListener listener) {
-    for (java.awt.event.ActionListener al : LogOut.getActionListeners()) {
-        LogOut.removeActionListener(al);
+    public void setLogOutButtonActionListener(java.awt.event.ActionListener listener) {
+        for (java.awt.event.ActionListener al : LogOut.getActionListeners()) {
+            LogOut.removeActionListener(al);
+        }
+        LogOut.addActionListener(listener);
     }
-    LogOut.addActionListener(listener);
-}
+
+    public void setChangePasswordActionListener(java.awt.event.ActionListener listener) {
+        for (java.awt.event.ActionListener al : ChangePassword.getActionListeners()) {
+            ChangePassword.removeActionListener(al);
+        }
+        ChangePassword.addActionListener(listener);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -70,6 +81,7 @@ public void setLogOutButtonActionListener(java.awt.event.ActionListener listener
         Lab = new javax.swing.JButton();
         ViewReserved = new javax.swing.JButton();
         LogOut = new javax.swing.JButton();
+        ChangePassword = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -103,6 +115,13 @@ public void setLogOutButtonActionListener(java.awt.event.ActionListener listener
             }
         });
 
+        ChangePassword.setText("비밀번호 변경");
+        ChangePassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ChangePasswordActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -114,17 +133,22 @@ public void setLogOutButtonActionListener(java.awt.event.ActionListener listener
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(121, 121, 121)
-                        .addComponent(jLabel1))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(65, 65, 65)
-                        .addComponent(Class, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(36, 36, 36)
-                        .addComponent(Lab, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(LogOut)))
-                .addContainerGap(71, Short.MAX_VALUE))
+                        .addComponent(LogOut)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(ChangePassword))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(121, 121, 121)
+                                .addComponent(jLabel1))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(65, 65, 65)
+                                .addComponent(Class, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(36, 36, 36)
+                                .addComponent(Lab, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 65, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -138,7 +162,9 @@ public void setLogOutButtonActionListener(java.awt.event.ActionListener listener
                 .addGap(46, 46, 46)
                 .addComponent(ViewReserved)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 65, Short.MAX_VALUE)
-                .addComponent(LogOut)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(LogOut)
+                    .addComponent(ChangePassword))
                 .addContainerGap())
         );
 
@@ -146,20 +172,24 @@ public void setLogOutButtonActionListener(java.awt.event.ActionListener listener
     }// </editor-fold>//GEN-END:initComponents
 
     private void ClassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ClassActionPerformed
-        
+
     }//GEN-LAST:event_ClassActionPerformed
 
     private void LabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LabActionPerformed
-    
+
     }//GEN-LAST:event_LabActionPerformed
 
     private void ViewReservedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ViewReservedActionPerformed
-       
+
     }//GEN-LAST:event_ViewReservedActionPerformed
 
     private void LogOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LogOutActionPerformed
-      
+
     }//GEN-LAST:event_LogOutActionPerformed
+
+    private void ChangePasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ChangePasswordActionPerformed
+
+    }//GEN-LAST:event_ChangePasswordActionPerformed
     /**
      * @param args the command line arguments
      */
@@ -196,6 +226,7 @@ public void setLogOutButtonActionListener(java.awt.event.ActionListener listener
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton ChangePassword;
     private javax.swing.JButton Class;
     private javax.swing.JButton Lab;
     private javax.swing.JButton LogOut;
