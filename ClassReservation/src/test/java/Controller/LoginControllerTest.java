@@ -1,11 +1,13 @@
+// LoginControllerTest.java
 package Controller;
+
 /* 로그인 test */
 
 import Controller.LoginController;
 import Model.UserDAO;
 import View.LoginForm;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled; // @Disabled 어노테이션을 위한 import
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -25,7 +27,7 @@ class LoginControllerTest {
     @InjectMocks
     private LoginController loginController;
 
-    @Disabled("CI에서 GUI 띄울 수 없음 - Headless 환경 회피")
+    @Disabled("CI 환경에서 서버 연결 실패로 인한 실패 방지")
     @Test
     void testHandleLogin_success() {
         when(mockView.getUserId()).thenReturn("S20230001");
@@ -39,6 +41,7 @@ class LoginControllerTest {
         verify(mockView).dispose();
     }
 
+    @Disabled("CI 환경에서 서버 연결 실패로 인한 예외 분기로 실패")
     @Test
     void testHandleLogin_fail() {
         when(mockView.getUserId()).thenReturn("S20230001");
