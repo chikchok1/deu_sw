@@ -63,6 +63,13 @@ public class LoginController {
         switch (userType) {
             case 'S': // 학생
             case 'P': // 교수도 같은 화면으로 이동
+                
+                 // 이미 열려 있는 RoomSelect 닫기
+            for (java.awt.Window window : java.awt.Window.getWindows()) {
+                if (window instanceof RoomSelect) {
+                    window.dispose();
+                }
+                }
                 RoomSelect roomSelect = new RoomSelect();
                 new RoomSelectController(roomSelect);
                 roomSelect.setVisible(true);

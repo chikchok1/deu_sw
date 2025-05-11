@@ -13,7 +13,7 @@ public class RoomSelectController {
     private RoomSelect view;
 
     public RoomSelectController(RoomSelect view) {
-            System.out.println("RoomSelectController 연결됨");
+        System.out.println("RoomSelectController 연결됨");
 
         this.view = view;
 
@@ -54,7 +54,7 @@ public class RoomSelectController {
     }
 
     private void handleLogout() {
-            System.out.println("로그아웃 버튼 클릭됨 - RoomSelect 종료 시도");
+        System.out.println("로그아웃 버튼 클릭됨 - RoomSelect 종료 시도");
 
         view.dispose(); // 현재 창 닫기
 
