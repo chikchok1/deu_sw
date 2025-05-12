@@ -66,46 +66,74 @@ public class ReservLabController {
     class ReservationListener implements ActionListener {
 
         @Override
-        public void actionPerformed(ActionEvent e) {
-            try {
-                // 세션에서 사용자 정보와 사용자가 선택한 예약 정보 가져오기
-                String userName = Session.getLoggedInUserName(); // 사용자 이름 가져오기
-                String selectedClassRoom = view.getSelectedClassRoom(); // 선택된 강의실
-                String selectedDay = view.getSelectedDay(); // 선택된 날짜
-                String selectedTime = view.getSelectedTime(); // 선택된 시간
-                String purpose = view.getPurpose(); // 예약 목적
+public void actionPerformed(ActionEvent e) {
+    try {
+        // 세션에서 사용자 정보와 사용자가 선택한 예약 정보 가져오기
+        String userName = Session.getLoggedInUserName();
+        String selectedClassRoom = view.getSelectedClassRoom();
+        String selectedDay = view.getSelectedDay();
+        String selectedTime = view.getSelectedTime();
+        String purpose = view.getPurpose();
 
-                // 예약 목적 유효성 확인
-                if (purpose.isEmpty()) {
-                    view.showMessage("사용 목적을 입력해주세요.");
-                    return;
-                }
-
-                // 같은 요일, 시간, 실습실에 예약이 존재하는지 확인
-                if (isDuplicateReservation(selectedClassRoom, selectedDay, selectedTime)) {
-                    view.showMessage("이미 같은 실습실, 요일 및 시간에 예약이 존재합니다.");
-                    return;
-                }
-
-                // 새로운 예약 정보를 파일에 추가
-                addReservationToFile(userName, selectedClassRoom, selectedDay, selectedTime, purpose);
-
-                // 성공 메시지 출력 및 현재 View 닫기
-                view.showMessage("예약이 완료되었습니다!");
-                view.closeView();
-
-                // 새로운 RoomSelect View로 전환
-                RoomSelect newRoomSelect = new RoomSelect();
-                new RoomSelectController(newRoomSelect);
-                newRoomSelect.setVisible(true);
-
-            } catch (Exception ex) {
-                ex.printStackTrace(); // 오류 로그 출력
-                view.showMessage("예약 중 오류 발생: " + ex.getMessage());
-            }
+        // 예약 목적 유효성 확인
+        if (purpose.isEmpty()) {
+            view.showMessage("사용 목적을 입력해주세요.");
+            return;
         }
 
-        // 중복 예약 확인 메서드 (강의실, 요일, 시간 조건 포함)
+        // ✅ 강의실 사용 가능 여부 확인
+        if (!isRoomAvailable(selectedClassRoom)) {
+            view.showMessage("해당 강의실은 현재 사용이 불가능합니다.");
+            return;
+        }
+
+        // 중복 예약 확인
+        if (isDuplicateReservation(selectedClassRoom, selectedDay, selectedTime)) {
+            view.showMessage("이미 같은 실습실, 요일 및 시간에 예약이 존재합니다.");
+            return;
+        }
+
+        // 예약 추가
+        addReservationToFile(userName, selectedClassRoom, selectedDay, selectedTime, purpose);
+
+        view.showMessage("예약이 완료되었습니다!");
+        view.closeView();
+
+        RoomSelect newRoomSelect = new RoomSelect();
+        new RoomSelectController(newRoomSelect);
+        newRoomSelect.setVisible(true);
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        view.showMessage("예약 중 오류 발생: " + ex.getMessage());
+    }
+}
+    // 강의실 사용 가능 여부 확인 메서드
+private boolean isRoomAvailable(String classRoom) {
+    String filePath = "data/RoomStatus.txt"; // 강의실 상태가 저장된 파일
+    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] tokens = line.split(",");
+            if (tokens.length >= 2) {
+                String room = tokens[0].trim();
+                String status = tokens[1].trim();
+                if (room.equals(classRoom)) {
+                    return status.equals("사용가능");
+                }
+            }
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    return false; // 파일에 없으면 기본적으로 사용 불가 처리
+}
+
+
+
+   
+        
+// 중복 예약 확인 메서드 (강의실, 요일, 시간 조건 포함)
         private boolean isDuplicateReservation(String classRoom, String day, String time) {
             try (BufferedReader reader = new BufferedReader(new FileReader("data/ReserveLab.txt"))) {
                 String line;
