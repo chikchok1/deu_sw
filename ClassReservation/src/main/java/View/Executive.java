@@ -51,6 +51,11 @@ public class Executive extends javax.swing.JFrame {
         });
 
         jButton3.setText("로그아웃");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         jButton4.setText("비밀번호 변경");
 
@@ -112,6 +117,10 @@ public class Executive extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton3ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -153,6 +162,10 @@ public javax.swing.JButton getViewReservedButton() {
 public javax.swing.JButton  getJButton2() {
     return jButton2;
 }
+public javax.swing.JButton getJButton3() {
+    return jButton3;
+}
+
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

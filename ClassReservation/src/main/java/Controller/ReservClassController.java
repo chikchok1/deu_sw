@@ -55,6 +55,25 @@ public class ReservClassController{
         });
 
     }
+// 강의실 상태 확인 메서드
+private boolean isRoomAvailable(String roomName) {
+    try (BufferedReader reader = new BufferedReader(new FileReader("data/ClassRoomStatus.txt"))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] tokens = line.split(",");
+            if (tokens.length >= 2) {
+                String storedRoom = tokens[0].trim();
+                String status = tokens[1].trim();
+                if (storedRoom.equals(roomName)) {
+                    return status.equals("사용가능");
+                }
+            }
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    return false; // 기본적으로 사용 불가능 처리
+}
 
     class ReservationListener implements ActionListener {
 
@@ -79,6 +98,10 @@ public class ReservClassController{
                     view.showMessage("이미 같은 강의실, 요일 및 시간에 예약이 존재합니다.");
                     return;
                 }
+                if (!isRoomAvailable(selectedClassRoom)) {
+    view.showMessage("이 강의실은 현재 사용 불가능합니다.");
+    return;
+}
 
                 // 새로운 예약 정보를 파일에 추가
                 addReservationToFile(userName, selectedClassRoom, selectedDay, selectedTime, purpose);
