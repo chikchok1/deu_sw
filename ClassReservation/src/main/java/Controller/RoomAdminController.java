@@ -71,7 +71,6 @@ try (BufferedWriter writer = new BufferedWriter(new FileWriter(statusFile))) {
                 JOptionPane.showMessageDialog(view, "적용되었습니다.");
                 // Executive 화면으로 전환
 view.dispose(); // 현재 RoomAdmin 창 닫기
-new Executive().setVisible(true); // 새로운 ExecutiveView 창 열기
             }
         });
     }
