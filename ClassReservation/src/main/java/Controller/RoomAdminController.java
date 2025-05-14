@@ -2,6 +2,7 @@ package Controller;
 
 import View.RoomAdmin;
 import View.Executive;
+
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.*;
@@ -13,21 +14,24 @@ public class RoomAdminController {
 
     public RoomAdminController(RoomAdmin view) {
         this.view = view;
-        initListeners();  // 이벤트 리스너 초기화
+        initListeners();
     }
 
     private void initListeners() {
-        // 확인 버튼 클릭 이벤트 리스너 등록
+         for (ActionListener al : view.getConfirmButton().getActionListeners()) {
+        view.getConfirmButton().removeActionListener(al);
+        }
         view.getConfirmButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // 사용자 입력 가져오기
                 String roomNumber = view.getRoomNumberField().getText().trim();
                 String status = (String) view.getStatusComboBox().getSelectedItem();
-                String otherDescription = view.getOtherDescriptionField().getText().trim();
 
-                // 불가능한 객실 정보 저장 파일
-                // 상태에 따라 강의실 상태 파일 갱신
+                if (roomNumber.isEmpty()) {
+                    JOptionPane.showMessageDialog(view, "강의실 번호를 입력하세요.");
+                    return;
+                }
+
 // 상태에 따라 강의실 상태 파일 갱신
 File statusFile = new File("data/RoomStatus.txt");
 Map<String, String> roomStatusMap = new LinkedHashMap<>();
@@ -51,28 +55,30 @@ if (statusFile.exists()) {
         ex.printStackTrace();
     }
 }
-
-// 현재 강의실 상태 갱신
 roomStatusMap.put(roomNumber, status);
-
-// 다시 파일에 쓰기
-try (BufferedWriter writer = new BufferedWriter(new FileWriter(statusFile))) {
-    for (Map.Entry<String, String> entry : roomStatusMap.entrySet()) {
-        writer.write(entry.getKey() + "," + entry.getValue());
-        writer.newLine();
-    }
-} catch (IOException ex) {
-    ex.printStackTrace();
+                // 강의실 상태 업데이트
+                if (status.equals("사용가능")) { // ← 주의: 띄어쓰기 제거
+    roomStatusMap.remove(roomNumber);
+} else if (status.equals("사용불가")) { // ← 주의: 띄어쓰기 제거
+    roomStatusMap.put(roomNumber, "사용불가");
 }
 
 
+                // 파일에 다시 쓰기
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(statusFile))) {
+                    for (Map.Entry<String, String> entry : roomStatusMap.entrySet()) {
+                        writer.write(entry.getKey() + "," + entry.getValue());
+                        writer.newLine();
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
 
-                // 결과 메시지 출력
+                // 완료 메시지 및 화면 전환
                 JOptionPane.showMessageDialog(view, "적용되었습니다.");
-                // Executive 화면으로 전환
-view.dispose(); // 현재 RoomAdmin 창 닫기
-new Executive().setVisible(true); // 새로운 ExecutiveView 창 열기
+                view.dispose();
             }
         });
     }
+    
 }

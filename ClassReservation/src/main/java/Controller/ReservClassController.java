@@ -56,15 +56,18 @@ public class ReservClassController {
 
     }
 // 강의실 상태 확인 메서드
-private boolean isRoomAvailable(String roomName) {
-    try (BufferedReader reader = new BufferedReader(new FileReader("data/ClassRoomStatus.txt"))) {
+// 강의실 사용 가능 여부 확인 메서드
+private boolean isRoomAvailable(String classRoom) {
+    classRoom = classRoom.replace("호", ""); // '호' 제거
+    String filePath = "data/RoomStatus.txt";
+    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
         String line;
-        while ((line = reader.readLine()) != null) {
+        while ((line = br.readLine()) != null) {
             String[] tokens = line.split(",");
             if (tokens.length >= 2) {
-                String storedRoom = tokens[0].trim();
+                String room = tokens[0].trim();
                 String status = tokens[1].trim();
-                if (storedRoom.equals(roomName)) {
+                if (room.equals(classRoom)) {
                     return status.equals("사용가능");
                 }
             }
@@ -72,8 +75,12 @@ private boolean isRoomAvailable(String roomName) {
     } catch (IOException e) {
         e.printStackTrace();
     }
-    return false; // 기본적으로 사용 불가능 처리
+    return true; // 기본적으로 사용 불가로 처리
 }
+
+
+
+
 
     class ReservationListener implements ActionListener {
 
@@ -200,55 +207,61 @@ private boolean isRoomAvailable(String roomName) {
     }
 
     public JTable buildCalendarTable(String room) {
-        String[] columnNames = {"교시", "월", "화", "수", "목", "금"};
-        String[] times = {"1교시", "2교시", "3교시", "4교시", "5교시", "6교시", "7교시", "8교시", "9교시"};
+    String[] columnNames = {"교시", "월", "화", "수", "목", "금"};
+    String[] times = {"1교시", "2교시", "3교시", "4교시", "5교시", "6교시", "7교시", "8교시", "9교시"};
 
-        DefaultTableModel model = new DefaultTableModel(times.length, columnNames.length);
-        model.setColumnIdentifiers(columnNames);
+    boolean roomAvailable = isRoomAvailable(room); // 강의실 상태 확인
 
-        JTable table = new JTable(model);
-        table.setRowHeight(30);
-        table.setShowGrid(true);
-        table.setGridColor(Color.GRAY);
+    DefaultTableModel model = new DefaultTableModel(times.length, columnNames.length);
+    model.setColumnIdentifiers(columnNames);
 
-        TableColumn firstColumn = table.getColumnModel().getColumn(0);
-        firstColumn.setPreferredWidth(60);
-        firstColumn.setMaxWidth(60);
-        firstColumn.setMinWidth(60);
-        // 첫 번째 열에 "교시" 데이터 채우기
-        for (int i = 0; i < times.length; i++) {
-            model.setValueAt(times[i], i, 0);  // 첫 번째 열에 교시값 넣기
-        }
+    JTable table = new JTable(model);
+    table.setRowHeight(30);
+    table.setShowGrid(true);
+    table.setGridColor(Color.GRAY);
 
-        // 셀 렌더러 설정
-        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+    TableColumn firstColumn = table.getColumnModel().getColumn(0);
+    firstColumn.setPreferredWidth(60);
+    firstColumn.setMaxWidth(60);
+    firstColumn.setMinWidth(60);
 
-                // 첫 번째 열(교시 열)은 색상을 유지하고 텍스트만 출력
-                if (column == 0) {
-                    cell.setBackground(Color.LIGHT_GRAY); // 교시 열 배경색
-                    cell.setHorizontalAlignment(JLabel.CENTER);
+    for (int i = 0; i < times.length; i++) {
+        model.setValueAt(times[i], i, 0);
+    }
+
+    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            if (column == 0) {
+                cell.setBackground(Color.LIGHT_GRAY);
+                cell.setHorizontalAlignment(JLabel.CENTER);
+                cell.setText(value != null ? value.toString() : "");
+            } else {
+                if (!roomAvailable) {
+                    cell.setBackground(Color.DARK_GRAY); // 사용불가일 경우 회색 표시
+                    cell.setText("X");
+                    cell.setForeground(Color.WHITE);
                 } else {
                     String day = columnNames[column];
                     String time = times[row];
-
                     if (isReserved(room, day, time)) {
                         cell.setBackground(Color.RED);
+                        cell.setText(""); // 예약된 경우
                     } else {
                         cell.setBackground(Color.WHITE);
+                        cell.setText("");
                     }
-
-                    cell.setText("");
                 }
-
-                return cell;
             }
-        });
+            return cell;
+        }
+    });
 
-        return table;
-    }
+    return table;
+}
+
 
 }
