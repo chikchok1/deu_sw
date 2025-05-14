@@ -6,6 +6,7 @@ import View.RoomSelect;
 import View.ReservClassView;
 import View.ReservLabView;
 import View.LoginForm;
+import View.Reservationchangeview;
 import View.ReservedRoomView;
 
 public class RoomSelectController {
@@ -23,6 +24,8 @@ public class RoomSelectController {
         this.view.setViewReservedActionListener(e -> openReservedClassRoom());
         this.view.setLogOutButtonActionListener(e -> handleLogout());
         this.view.setChangePasswordActionListener(e -> openChangePasswordView());
+        this.view.setReservationChangeActionListener(e -> openReservationChange());
+
     }
 
     private void openChangePasswordView() {
@@ -53,16 +56,23 @@ public class RoomSelectController {
         view.dispose();
     }
 
+    private void openReservationChange() {
+        Reservationchangeview changeView = new Reservationchangeview();
+        new ReservationchangeviewController(changeView);
+        changeView.setVisible(true);
+        view.dispose();
+    }
+
     private void handleLogout() {
+
         System.out.println("로그아웃 버튼 클릭됨 - RoomSelect 종료 시도");
 
-        view.dispose(); // 현재 창 닫기
+        RoomSelect.destroyInstance(); // 인스턴스 초기화
+        view.dispose();
 
-        // 다시 로그인 폼 띄우기
         LoginForm loginForm = new LoginForm();
         UserDAO dao = new UserDAO();
         new LoginController(loginForm, dao);
-
         loginForm.setVisible(true);
     }
 }
