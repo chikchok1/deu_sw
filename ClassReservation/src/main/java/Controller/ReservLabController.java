@@ -9,7 +9,6 @@ package Controller;
  * @author YangJinWon
  */
 import Model.Session;
-import View.ReservClassView;
 import View.ReservLabView;
 import View.RoomSelect;
 import java.awt.Color;
@@ -46,9 +45,11 @@ public class ReservLabController {
         // 이전 버튼 리스너 등록
         this.view.getBeforeButton().addActionListener(e -> {
             view.dispose();
-            RoomSelect roomSelect = new RoomSelect();
+            
+           RoomSelect roomSelect = RoomSelect.getInstance();
             new RoomSelectController(roomSelect);
             roomSelect.setVisible(true);
+            view.dispose(); // 현재 ReservClassView 닫기
         });
         loadReservationData();
         JTable initialTable = buildCalendarTable(view.getSelectedClassRoom());
