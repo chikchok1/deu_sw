@@ -24,45 +24,58 @@ public class LoginController {
         this.view.addLoginListener(e -> handleLogin());
         this.view.addJoinListener(e -> openMembership());
     }
+ // GitHub Actions 동작 확인용 커밋
 
-    private void handleLogin() {
-        String id = view.getUserId();
-        String password = view.getPassword();
-        
-         String serverIp = ConfigLoader.getProperty("server.ip");
+/**
+ * [테스트 용도로만 public 처리함]
+ */
+public void handleLogin() {
+    String id = view.getUserId();
+    String password = view.getPassword();
+
+    String serverIp = ConfigLoader.getProperty("server.ip");
     int serverPort = Integer.parseInt(ConfigLoader.getProperty("server.port"));
 
-        try (
-                Socket socket = new Socket(serverIp, serverPort);
+    try (
+        Socket socket = new Socket(serverIp, serverPort);
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                ){   out.println("LOGIN," + id + "," + password);
+    ) {
+        out.println("LOGIN," + id + "," + password);
 
-            // 서버 응답 처리
-            String response = in.readLine();
-            if (response != null && response.startsWith("SUCCESS")) {
-                String[] parts = response.split(",", 2);
-                String userName = parts.length > 1 ? parts[1] : "이름없음";
+        // 서버 응답 처리
+        String response = in.readLine();
+        if (response != null && response.startsWith("SUCCESS")) {
+            String[] parts = response.split(",", 2);
+            String userName = parts.length > 1 ? parts[1] : "이름없음";
 
-                // 세션 저장
-                Session.setLoggedInUserId(id);
-                Session.setLoggedInUserName(userName);
+            // 세션 저장
+            Session.setLoggedInUserId(id);
+            Session.setLoggedInUserName(userName);
 
-                view.showMessage("로그인 성공!");
-                view.dispose();
-                openUserMainView(id.charAt(0));
-            } else {
-                view.showMessage("로그인 실패: 아이디 또는 비밀번호가 틀렸습니다.");
-            }
-        } catch (IOException e) {
-            view.showMessage("서버와 연결할 수 없습니다: " + e.getMessage());
+            view.showMessage("로그인 성공!");
+            view.dispose();
+            openUserMainView(id.charAt(0));
+        } else {
+            view.showMessage("로그인 실패: 아이디 또는 비밀번호가 틀렸습니다.");
         }
+    } catch (IOException e) {
+        view.showMessage("서버와 연결할 수 없습니다: " + e.getMessage());
     }
+}
+
 
     private void openUserMainView(char userType) {
         switch (userType) {
             case 'S': // 학생
             case 'P': // 교수도 같은 화면으로 이동
+                
+                 // 이미 열려 있는 RoomSelect 닫기
+            for (java.awt.Window window : java.awt.Window.getWindows()) {
+                if (window instanceof RoomSelect) {
+                    window.dispose();
+                }
+                }
                 RoomSelect roomSelect = new RoomSelect();
                 new RoomSelectController(roomSelect);
                 roomSelect.setVisible(true);
