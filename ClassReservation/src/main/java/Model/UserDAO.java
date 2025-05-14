@@ -11,6 +11,8 @@ public class UserDAO {
     private static final String RESERVE_CLASS_FILE = DATA_FOLDER + "/ReserveClass.txt";
     private static final String RESERVE_LAB_FILE = DATA_FOLDER + "/ReserveLab.txt";
     private static final String CHANGE_REQUEST = DATA_FOLDER + "/ChangeRequest.txt";
+        private static final String ROOM_STATUS = DATA_FOLDER + "/RoomStatus.txt";
+
 
     public UserDAO() {
         new File(DATA_FOLDER).mkdirs();
@@ -20,6 +22,8 @@ public class UserDAO {
         createFileIfNotExists(RESERVE_CLASS_FILE);
         createFileIfNotExists(RESERVE_LAB_FILE);
         createFileIfNotExists(CHANGE_REQUEST);
+                createFileIfNotExists(ROOM_STATUS);
+
 
     }
 
