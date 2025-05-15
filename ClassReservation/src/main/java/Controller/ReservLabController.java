@@ -122,7 +122,7 @@ private boolean isRoomAvailable(String classRoom) {
     } catch (IOException e) {
         e.printStackTrace();
     }
-    return false; // 기본적으로 사용 불가로 처리
+    return true; // 기본적으로 사용 불가로 처리
 }
 
 
