@@ -174,20 +174,16 @@ private boolean isRoomAvailable(String classRoom) {
 
         // ✅ 요청을 ReservationRequest.txt 에 저장하는 메서드 추가
         private void addReservationToRequestFile(String name, String room, String day, String time, String purpose, String role) {
-    String userId = Session.getLoggedInUserId(); // 예약 ID로 로그인 아이디 사용
-    String line = String.join(",", userId, name, room, day, time, purpose, role, "대기");
-
-    File file = new File("data/ReservationRequest.txt");
-    file.getParentFile().mkdirs();
-
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-        writer.write(line);
-        writer.newLine();
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-}
-
+            String line = String.join(",", name, room, day, time, purpose, role, "대기");
+            File file = new File("data/ReservationRequest.txt");
+            file.getParentFile().mkdirs();
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+                writer.write(line);
+                writer.newLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void loadReservationData() {

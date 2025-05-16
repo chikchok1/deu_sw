@@ -7,8 +7,6 @@ import View.RoomAdmin;  // ← 이 줄 추가
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import Model.UserDAO;
-import View.ClassroomReservationApproval;
-import Controller.ClassroomReservationApprovalController;
 
 public class ExecutiveController {
 
@@ -39,12 +37,7 @@ this.executive.getJButton3().addActionListener(new ActionListener() {
         logout();
     }
 });
- this.executive.getUserManageButton().addActionListener(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            openReservationApprovalView(); // 승인 화면으로 이동
-        }
-    });
+
     }
 
 private void logout() {
@@ -55,12 +48,6 @@ private void logout() {
     loginForm.setVisible(true);
 }
 
-private void openReservationApprovalView() {
-    ClassroomReservationApproval approvalView = new ClassroomReservationApproval();
-    new ClassroomReservationApprovalController(approvalView); // 컨트롤러 연결
-    approvalView.setVisible(true);  // 승인 화면 보여주기
-    executive.dispose();            // 기존 Executive 창 닫기 
-}
 
     
     private void openReservedRoomView() {
