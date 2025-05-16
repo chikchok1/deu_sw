@@ -52,6 +52,14 @@ public void handleLogin() {
             // 세션 저장
             Session.setLoggedInUserId(id);
             Session.setLoggedInUserName(userName);
+            // 🟩 사용자 역할 설정 (S: 학생, P: 교수, A: 조교)
+            String role = switch (id.charAt(0)) {
+            case 'S' -> "학생";
+            case 'P' -> "교수";
+            case 'A' -> "조교";
+            default  -> "알 수 없음";
+            };
+            Session.setLoggedInUserRole(role);
 
             view.showMessage("로그인 성공!");
             view.dispose();

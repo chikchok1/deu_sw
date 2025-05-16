@@ -54,9 +54,9 @@ public class ClassroomReservationApprovalController {
             String newRoom = (String) model.getValueAt(selectedRow, 3);
             String userName = (String) model.getValueAt(selectedRow, 4);
 
-            File reserveFile = new File("data/ReserveClass.txt");
-            File tempFile = new File("data/ReserveClass_temp.txt");
-
+            String targetFile = newRoom.contains("실") ? "data/ReserveLab.txt" : "data/ReserveClass.txt";
+            File reserveFile = new File(targetFile);
+            File tempFile = new File(targetFile.replace(".txt", "_temp.txt"));
             try (
                 BufferedReader reader = new BufferedReader(new FileReader(reserveFile));
                 BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))

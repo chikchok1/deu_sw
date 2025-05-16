@@ -55,32 +55,28 @@ public class ReservClassController {
         });
 
     }
-// 강의실 상태 확인 메서드
-// 강의실 사용 가능 여부 확인 메서드
-private boolean isRoomAvailable(String classRoom) {
-    classRoom = classRoom.replace("호", ""); // '호' 제거
-    String filePath = "data/RoomStatus.txt";
-    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            String[] tokens = line.split(",");
-            if (tokens.length >= 2) {
-                String room = tokens[0].trim();
-                String status = tokens[1].trim();
-                if (room.equals(classRoom)) {
-                    return status.equals("사용가능");
+    // 강의실 상태 확인 메서드
+    // 강의실 사용 가능 여부 확인 메서드
+    private boolean isRoomAvailable(String classRoom) {
+        classRoom = classRoom.replace("호", ""); // '호' 제거
+        String filePath = "data/RoomStatus.txt";
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 2) {
+                    String room = tokens[0].trim();
+                    String status = tokens[1].trim();
+                    if (room.equals(classRoom)) {
+                        return status.equals("사용가능");
+                    }
                 }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    } catch (IOException e) {
-        e.printStackTrace();
+        return true; // 기본적으로 사용 불가로 처리
     }
-    return true; // 기본적으로 사용 불가로 처리
-}
-
-
-
-
 
     class ReservationListener implements ActionListener {
 
@@ -106,15 +102,19 @@ private boolean isRoomAvailable(String classRoom) {
                     return;
                 }
                 if (!isRoomAvailable(selectedClassRoom)) {
-    view.showMessage("이 강의실은 현재 사용 불가능합니다.");
-    return;
-}
+                    view.showMessage("이 강의실은 현재 사용 불가능합니다.");
+                    return;
+                }
 
-                // 새로운 예약 정보를 파일에 추가
-                addReservationToFile(userName, selectedClassRoom, selectedDay, selectedTime, purpose);
+                // 예약 요청을 ReservationRequest.txt에 '대기' 상태로 저장 (기존 즉시 예약 외에 추가 저장)
+                String userRole = Session.getLoggedInUserRole(); // 사용자 권한 (학생, 교수 등)
+                addReservationToRequestFile(userName, selectedClassRoom, selectedDay, selectedTime, purpose, userRole);
+
+                // 새로운 예약 정보를 파일에 추가 승인후에 처리해야 하므로 주석처리
+                //addReservationToFile(userName, selectedClassRoom, selectedDay, selectedTime, purpose);
 
                 // 성공 메시지 출력 및 현재 View 닫기
-                view.showMessage("예약이 완료되었습니다!");
+                view.showMessage("예약이 완료되었습니다 승인 후 처리됩니다!");
                 view.closeView();
 
                 // 새로운 RoomSelect View로 전환
@@ -177,7 +177,6 @@ private boolean isRoomAvailable(String classRoom) {
                 e.printStackTrace(); // 파일 쓰기 오류 처리
             }
         }
-
     }
 
     private void loadReservationData() {
@@ -198,70 +197,82 @@ private boolean isRoomAvailable(String classRoom) {
             e.printStackTrace();
         }
     }
-    // 예약 여부 확인 메서드
 
+    // 예약 여부 확인 메서드
     private boolean isReserved(String room, String day, String time) {
         String key = day + "_" + time;
         Set<String> reservedTimes = reservedMap.get(room);
         return reservedTimes != null && reservedTimes.contains(key);
     }
 
-    public JTable buildCalendarTable(String room) {
-    String[] columnNames = {"교시", "월", "화", "수", "목", "금"};
-    String[] times = {"1교시", "2교시", "3교시", "4교시", "5교시", "6교시", "7교시", "8교시", "9교시"};
+    // 🟩 [추가] 예약 요청 정보를 '대기' 상태로 따로 저장하는 메서드
+    private void addReservationToRequestFile(String name, String room, String day, String time, String purpose, String role) {
+        String line = String.join(",", name, room, day, time, purpose, role, "대기");
+        File file = new File("data/ReservationRequest.txt");
+        file.getParentFile().mkdirs();
 
-    boolean roomAvailable = isRoomAvailable(room); // 강의실 상태 확인
-
-    DefaultTableModel model = new DefaultTableModel(times.length, columnNames.length);
-    model.setColumnIdentifiers(columnNames);
-
-    JTable table = new JTable(model);
-    table.setRowHeight(30);
-    table.setShowGrid(true);
-    table.setGridColor(Color.GRAY);
-
-    TableColumn firstColumn = table.getColumnModel().getColumn(0);
-    firstColumn.setPreferredWidth(60);
-    firstColumn.setMaxWidth(60);
-    firstColumn.setMinWidth(60);
-
-    for (int i = 0; i < times.length; i++) {
-        model.setValueAt(times[i], i, 0);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+            writer.write(line);
+            writer.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
-            JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+    public JTable buildCalendarTable(String room) {
+        String[] columnNames = {"교시", "월", "화", "수", "목", "금"};
+        String[] times = {"1교시", "2교시", "3교시", "4교시", "5교시", "6교시", "7교시", "8교시", "9교시"};
 
-            if (column == 0) {
-                cell.setBackground(Color.LIGHT_GRAY);
-                cell.setHorizontalAlignment(JLabel.CENTER);
-                cell.setText(value != null ? value.toString() : "");
-            } else {
-                if (!roomAvailable) {
-                    cell.setBackground(Color.DARK_GRAY); // 사용불가일 경우 회색 표시
-                    cell.setText("X");
-                    cell.setForeground(Color.WHITE);
+        boolean roomAvailable = isRoomAvailable(room); // 강의실 상태 확인
+
+        DefaultTableModel model = new DefaultTableModel(times.length, columnNames.length);
+        model.setColumnIdentifiers(columnNames);
+
+        JTable table = new JTable(model);
+        table.setRowHeight(30);
+        table.setShowGrid(true);
+        table.setGridColor(Color.GRAY);
+
+        TableColumn firstColumn = table.getColumnModel().getColumn(0);
+        firstColumn.setPreferredWidth(60);
+        firstColumn.setMaxWidth(60);
+        firstColumn.setMinWidth(60);
+
+        for (int i = 0; i < times.length; i++) {
+            model.setValueAt(times[i], i, 0);
+        }
+
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (column == 0) {
+                    cell.setBackground(Color.LIGHT_GRAY);
+                    cell.setHorizontalAlignment(JLabel.CENTER);
+                    cell.setText(value != null ? value.toString() : "");
                 } else {
-                    String day = columnNames[column];
-                    String time = times[row];
-                    if (isReserved(room, day, time)) {
-                        cell.setBackground(Color.RED);
-                        cell.setText(""); // 예약된 경우
+                    if (!roomAvailable) {
+                        cell.setBackground(Color.DARK_GRAY); // 사용불가일 경우 회색 표시
+                        cell.setText("X");
+                        cell.setForeground(Color.WHITE);
                     } else {
-                        cell.setBackground(Color.WHITE);
-                        cell.setText("");
+                        String day = columnNames[column];
+                        String time = times[row];
+                        if (isReserved(room, day, time)) {
+                            cell.setBackground(Color.RED);
+                            cell.setText(""); // 예약된 경우
+                        } else {
+                            cell.setBackground(Color.WHITE);
+                            cell.setText("");
+                        }
                     }
                 }
+                return cell;
             }
-            return cell;
-        }
-    });
+        });
 
-    return table;
-}
-
-
+        return table;
+    }
 }

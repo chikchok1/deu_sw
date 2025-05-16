@@ -1,5 +1,5 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Controller;
@@ -21,6 +21,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.File;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -86,10 +87,14 @@ private ReservLabView view;
                     return;
                 }
 
-                // ✅ 예약 추가
-                addReservationToFile(userName, selectedClassRoom, selectedDay, selectedTime, purpose);
+                // ✅ 예약 요청을 ReservationRequest.txt에 대기 상태로 저장
+                String userRole = Session.getLoggedInUserRole();
+                addReservationToRequestFile(userName, selectedClassRoom, selectedDay, selectedTime, purpose, userRole);
 
-                view.showMessage("예약이 완료되었습니다!");
+                // ✅ 예약 추가 부분을 승인 없이 예약을 확정하면 안 되므로 아래 줄은 주석 처리함
+                //addReservationToFile(userName, selectedClassRoom, selectedDay, selectedTime, purpose);
+
+                view.showMessage("예약이 완료되었습니다. 승인 후 확정됩니다!");
                 view.closeView();
 
                 RoomSelect newRoomSelect = new RoomSelect();
@@ -161,6 +166,19 @@ private boolean isRoomAvailable(String classRoom) {
                 }
 
                 writer.write(userName + "," + room + "," + day + "," + time + "," + purpose + "," + userType + ",예약됨");
+                writer.newLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // ✅ 요청을 ReservationRequest.txt 에 저장하는 메서드 추가
+        private void addReservationToRequestFile(String name, String room, String day, String time, String purpose, String role) {
+            String line = String.join(",", name, room, day, time, purpose, role, "대기");
+            File file = new File("data/ReservationRequest.txt");
+            file.getParentFile().mkdirs();
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+                writer.write(line);
                 writer.newLine();
             } catch (IOException e) {
                 e.printStackTrace();
