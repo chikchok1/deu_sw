@@ -62,6 +62,11 @@ public class Executive extends javax.swing.JFrame {
         jLabel1.setText("예약내역 및 강의실 관리");
 
         jButton5.setText("사용자 관리");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -121,6 +126,10 @@ public class Executive extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton5ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -164,6 +173,9 @@ public javax.swing.JButton  getJButton2() {
 }
 public javax.swing.JButton getJButton3() {
     return jButton3;
+}
+public javax.swing.JButton getJButton5() {
+    return jButton5;
 }
 
 

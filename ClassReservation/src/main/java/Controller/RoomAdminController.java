@@ -11,10 +11,13 @@ import java.util.*;
 public class RoomAdminController {
 
     private RoomAdmin view;
-
+    
+   
+    
     public RoomAdminController(RoomAdmin view) {
         this.view = view;
         initListeners();
+        view.getJButton2().addActionListener(e -> goBackToExecutive()); // 이전
     }
 
     private void initListeners() {
@@ -80,5 +83,12 @@ roomStatusMap.put(roomNumber, status);
             }
         });
     }
+ 
+        private void goBackToExecutive() {
+    view.dispose(); // 현재 창 닫기
+    View.Executive executiveView = new View.Executive(); // Executive 뷰 생성
+    new Controller.ExecutiveController(executiveView);   // Executive 컨트롤러 연결
+    executiveView.setVisible(true); // 창 띄우기
+}
     
 }
