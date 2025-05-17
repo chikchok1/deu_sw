@@ -12,49 +12,75 @@ import Model.Session;
 import View.ReservClassView;
 import View.RoomSelect;
 
-import java.awt.*; 
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*; 
-import java.util.*; 
-import javax.swing.JTable; 
-import javax.swing.table.*; 
-import javax.swing.JLabel; 
+import java.io.*;
+import java.util.*;
+import javax.swing.JTable;
+import javax.swing.table.*;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 
-
-
-
-public class ReservClassController{
+public class ReservClassController {
 
     private ReservClassView view;
-    private Map<String, Set<String>> reservedMap = new HashMap<>(); 
+    private Map<String, Set<String>> reservedMap = new HashMap<>();
 
     // 생성자: View와 컨트롤러를 연결하고 버튼 리스너를 초기화
     public ReservClassController(ReservClassView view) {
         this.view = view;
-        this.view.resetReservationButtonListener(); 
-        this.view.addReservationListener(new ReservationListener()); 
+        this.view.resetReservationButtonListener();
+        this.view.addReservationListener(new ReservationListener());
 
         // 이전 버튼 리스너 등록
         this.view.getBeforeButton().addActionListener(e -> {
             view.dispose();
-            RoomSelect roomSelect = new RoomSelect();
+
+            RoomSelect roomSelect = RoomSelect.getInstance();
             new RoomSelectController(roomSelect);
             roomSelect.setVisible(true);
+            view.dispose(); // 현재 ReservClassView 닫기
+
         });
         loadReservationData();
         JTable initialTable = buildCalendarTable(view.getSelectedClassRoom());
-        view.updateCalendarTable(initialTable); 
+        view.updateCalendarTable(initialTable);
 
-        view.getClassComboBox().addActionListener(e -> { 
+        view.getClassComboBox().addActionListener(e -> {
             String selectedRoom = view.getSelectedClassRoom();
             loadReservationData();
-            JTable newTable = buildCalendarTable(selectedRoom); 
+            JTable newTable = buildCalendarTable(selectedRoom);
             view.updateCalendarTable(newTable);
         });
 
     }
+// 강의실 상태 확인 메서드
+// 강의실 사용 가능 여부 확인 메서드
+private boolean isRoomAvailable(String classRoom) {
+    classRoom = classRoom.replace("호", ""); // '호' 제거
+    String filePath = "data/RoomStatus.txt";
+    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] tokens = line.split(",");
+            if (tokens.length >= 2) {
+                String room = tokens[0].trim();
+                String status = tokens[1].trim();
+                if (room.equals(classRoom)) {
+                    return status.equals("사용가능");
+                }
+            }
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    return true; // 기본적으로 사용 불가로 처리
+}
+
+
+
+
 
     class ReservationListener implements ActionListener {
 
@@ -79,6 +105,10 @@ public class ReservClassController{
                     view.showMessage("이미 같은 강의실, 요일 및 시간에 예약이 존재합니다.");
                     return;
                 }
+                if (!isRoomAvailable(selectedClassRoom)) {
+    view.showMessage("이 강의실은 현재 사용 불가능합니다.");
+    return;
+}
 
                 // 새로운 예약 정보를 파일에 추가
                 addReservationToFile(userName, selectedClassRoom, selectedDay, selectedTime, purpose);
@@ -149,6 +179,7 @@ public class ReservClassController{
         }
 
     }
+
     private void loadReservationData() {
         reservedMap.clear();
         String filePath = "data/ReserveClass.txt";
@@ -167,67 +198,70 @@ public class ReservClassController{
             e.printStackTrace();
         }
     }
-        // 예약 여부 확인 메서드
+    // 예약 여부 확인 메서드
+
     private boolean isReserved(String room, String day, String time) {
         String key = day + "_" + time;
         Set<String> reservedTimes = reservedMap.get(room);
         return reservedTimes != null && reservedTimes.contains(key);
     }
 
-
-
     public JTable buildCalendarTable(String room) {
-        String[] columnNames = {"교시", "월", "화", "수", "목", "금"};
-        String[] times = {"1교시", "2교시", "3교시", "4교시", "5교시", "6교시", "7교시", "8교시", "9교시"};
+    String[] columnNames = {"교시", "월", "화", "수", "목", "금"};
+    String[] times = {"1교시", "2교시", "3교시", "4교시", "5교시", "6교시", "7교시", "8교시", "9교시"};
 
-        DefaultTableModel model = new DefaultTableModel(times.length, columnNames.length);
-        model.setColumnIdentifiers(columnNames);
-    
-        JTable table = new JTable(model);
-        table.setRowHeight(30);
-        table.setShowGrid(true);  
-        table.setGridColor(Color.GRAY);
+    boolean roomAvailable = isRoomAvailable(room); // 강의실 상태 확인
 
-        TableColumn firstColumn = table.getColumnModel().getColumn(0);
-        firstColumn.setPreferredWidth(60);
-        firstColumn.setMaxWidth(60);
-        firstColumn.setMinWidth(60);
-    // 첫 번째 열에 "교시" 데이터 채우기
-        for (int i = 0; i < times.length; i++) {
-            model.setValueAt(times[i], i, 0);  // 첫 번째 열에 교시값 넣기
-        }
+    DefaultTableModel model = new DefaultTableModel(times.length, columnNames.length);
+    model.setColumnIdentifiers(columnNames);
 
-    // 셀 렌더러 설정
-        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                                                       boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+    JTable table = new JTable(model);
+    table.setRowHeight(30);
+    table.setShowGrid(true);
+    table.setGridColor(Color.GRAY);
 
-            // 첫 번째 열(교시 열)은 색상을 유지하고 텍스트만 출력
-                if (column == 0) {
-                    cell.setBackground(Color.LIGHT_GRAY); // 교시 열 배경색
-                    cell.setHorizontalAlignment(JLabel.CENTER);
+    TableColumn firstColumn = table.getColumnModel().getColumn(0);
+    firstColumn.setPreferredWidth(60);
+    firstColumn.setMaxWidth(60);
+    firstColumn.setMinWidth(60);
+
+    for (int i = 0; i < times.length; i++) {
+        model.setValueAt(times[i], i, 0);
+    }
+
+    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            if (column == 0) {
+                cell.setBackground(Color.LIGHT_GRAY);
+                cell.setHorizontalAlignment(JLabel.CENTER);
+                cell.setText(value != null ? value.toString() : "");
+            } else {
+                if (!roomAvailable) {
+                    cell.setBackground(Color.DARK_GRAY); // 사용불가일 경우 회색 표시
+                    cell.setText("X");
+                    cell.setForeground(Color.WHITE);
                 } else {
                     String day = columnNames[column];
                     String time = times[row];
-
                     if (isReserved(room, day, time)) {
                         cell.setBackground(Color.RED);
+                        cell.setText(""); // 예약된 경우
                     } else {
                         cell.setBackground(Color.WHITE);
+                        cell.setText("");
                     }
-
-                    cell.setText("");
                 }
-
-                return cell;
             }
-        });
+            return cell;
+        }
+    });
 
-        return table;
-    }
-
+    return table;
+}
 
 
 }

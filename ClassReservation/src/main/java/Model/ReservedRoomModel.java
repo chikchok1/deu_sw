@@ -47,4 +47,22 @@ public class ReservedRoomModel {
         }
         return result;
     }
+
+    //특정 사용자의 예약 정보를 반환
+    public List<Reservation> viewUserReservations(User user, String selectedRoom) {
+        List<Reservation> result = new ArrayList<>();
+
+        if (user == null || user.getUserId() == null) {
+            System.out.println("로그인되지 않은 사용자입니다.");
+            return result;
+        }
+
+        char userType = user.getUserId().charAt(0);
+        String userName = user.getName();
+
+        result.addAll(getReservations("data/ReserveClass.txt", selectedRoom, userType, userName));
+        result.addAll(getReservations("data/ReserveLab.txt", selectedRoom, userType, userName));
+
+        return result;
+    }
 }
