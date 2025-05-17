@@ -7,6 +7,9 @@ import View.RoomAdmin;  // ← 이 줄 추가
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import Model.UserDAO;
+import View.ClientAdmin;
+import Controller.RoomAdminController;
+
 
 public class ExecutiveController {
 
@@ -34,19 +37,32 @@ public class ExecutiveController {
 this.executive.getJButton3().addActionListener(new ActionListener() {
     @Override
     public void actionPerformed(ActionEvent e) {
+        
         logout();
     }
 });
+// [4] "고객 관리" 버튼 (jButton5)
+this.executive.getJButton5().addActionListener(new ActionListener() {
+    
+    @Override
+    
+    public void actionPerformed(ActionEvent e) {
+        openClientAdminView();
+    }
+});
+
 
     }
 
 private void logout() {
-    executive.dispose();
+    executive.setVisible(false);  // 보조적으로 창 숨기기
+    executive.dispose();          // 창 닫기
     LoginForm loginForm = new LoginForm();
-    UserDAO dao = new UserDAO(); // DB 접근 객체 (이미 너가 LoginController에 넘겨주고 있음)
-    new LoginController(loginForm, dao); // ✅ 컨트롤러 연결
+    UserDAO dao = new UserDAO();
+    new LoginController(loginForm, dao);
     loginForm.setVisible(true);
 }
+
 
 
     
@@ -61,4 +77,11 @@ private void logout() {
         new RoomAdminController(roomAdmin); // 컨트롤러 연결 (있다면)
         roomAdmin.setVisible(true);
     }
+    
+    private void openClientAdminView() {
+    ClientAdmin clientAdmin = new ClientAdmin(); // 뷰 인스턴스 생성
+    new ClientAdminController(clientAdmin);      // 컨트롤러 연결
+    clientAdmin.setVisible(true);                // 화면 표시
+}
+
 }
