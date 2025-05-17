@@ -199,11 +199,17 @@ public class ReservClassController {
     }
 
     // 예약 여부 확인 메서드
-    private boolean isReserved(String room, String day, String time) {
-        String key = day + "_" + time;
-        Set<String> reservedTimes = reservedMap.get(room);
-        return reservedTimes != null && reservedTimes.contains(key);
+   private boolean isReserved(String room, String day, String time) {
+    // 🔧 room 값이 "914"처럼 들어오더라도 "914호"와 비교 가능하게 통일
+    if (!room.endsWith("호")) {
+        room = room + "호";
     }
+
+    String key = day + "_" + time;
+    Set<String> reservedTimes = reservedMap.get(room);
+    return reservedTimes != null && reservedTimes.contains(key);
+}
+
 
     // 🟩 [추가] 예약 요청 정보를 '대기' 상태로 따로 저장하는 메서드
     private void addReservationToRequestFile(String name, String room, String day, String time, String purpose, String role) {

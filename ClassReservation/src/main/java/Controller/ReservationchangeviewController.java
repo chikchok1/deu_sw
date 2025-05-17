@@ -9,8 +9,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.io.*;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class ReservationchangeviewController {
 
@@ -19,11 +17,10 @@ public class ReservationchangeviewController {
     public ReservationchangeviewController(Reservationchangeview view) {
         this.view = view;
 
-        // 변경 버튼 동작 설정
         this.view.setChangeButtonActionListener(e -> handleReservationChange());
         this.view.setBackButtonActionListener(e -> handleBack());
+        this.view.setCancelButtonActionListener(e -> handleReservationCancel());
 
-        // JTable 클릭 시 예약ID 자동 입력
         this.view.getReservationTable().getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -37,22 +34,33 @@ public class ReservationchangeviewController {
             }
         });
 
-        // 로그인한 사용자의 예약 정보 불러오기
         loadUserReservations();
     }
 
     private void handleBack() {
-        view.dispose(); // 현재 창 닫기
-        RoomSelect roomSelect = RoomSelect.getInstance(); // 기존 인스턴스 가져오기
-        new RoomSelectController(roomSelect); // 컨트롤러 다시 연결
-        roomSelect.setVisible(true); // 화면 다시 띄우기
+        view.dispose();
+        RoomSelect roomSelect = RoomSelect.getInstance();
+        new RoomSelectController(roomSelect);
+        roomSelect.setVisible(true);
     }
 
     private void handleReservationChange() {
+        int selectedRow = view.getReservationTable().getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(view, "변경할 예약을 선택하세요.");
+            return;
+        }
+
+        DefaultTableModel model = (DefaultTableModel) view.getReservationTable().getModel();
+        String reservationId = (String) model.getValueAt(selectedRow, 0);
+        String originalTime = (String) model.getValueAt(selectedRow, 1);
+        String originalDay = (String) model.getValueAt(selectedRow, 2);
+        String room = (String) model.getValueAt(selectedRow, 3);
+
         String newDay = view.getSelectedDay();
         String newTime = view.getSelectedTime();
         String selectedRoom = view.getSelectedRoom();
-        String userId = Session.getLoggedInUserId(); // S123, P001 등
+        String userId = Session.getLoggedInUserId();
         String userName = Session.getLoggedInUserName();
 
         if (newDay.equals("선택") || newTime.equals("선택") || selectedRoom == null) {
@@ -65,120 +73,150 @@ public class ReservationchangeviewController {
             return;
         }
 
-        // 중복 예약 체크: 다른 사용자가 같은 시간, 요일, 강의실로 변경 요청한 경우
         File changeFile = new File("data/ChangeRequest.txt");
+        if (changeFile.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(changeFile))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 5) {
+                        String existingTime = parts[1];
+                        String existingDay = parts[2];
+                        String existingRoom = parts[3];
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(changeFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 4) {
-                    String existingUserId = parts[0];
-                    String time = parts[1];
-                    String day = parts[2];
-                    String room = parts[3];
-
-                    if (!existingUserId.equals(userId) && time.equals(newTime) && day.equals(newDay) && room.equals(selectedRoom)) {
-                        JOptionPane.showMessageDialog(view, "이미 해당 시간에 강의실이 예약되어 있습니다.");
-                        return;
+                        if (existingTime.equals(newTime) && existingDay.equals(newDay) && existingRoom.equals(selectedRoom)) {
+                            JOptionPane.showMessageDialog(view, "해당 시간, 요일, 강의실에 이미 변경 요청이 존재합니다.");
+                            return;
+                        }
                     }
                 }
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(view, "파일 읽기 오류: " + e.getMessage());
+                return;
             }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(view, "파일 읽기 오류: " + e.getMessage());
-            return;
         }
 
-        // 변경 요청 반영 (또는 새로 추가)
-        File tempFile = new File("data/ChangeRequest_temp.txt");
-
-        try (
-                BufferedReader reader = new BufferedReader(new FileReader(changeFile)); BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
-            String line;
-            boolean updated = false;
-
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 5 && parts[0].equals(userId)) {
-                    // 사용자 본인의 기존 요청 덮어쓰기
-                    writer.write(userId + "," + newTime + "," + newDay + "," + selectedRoom + "," + userName);
-                    writer.newLine();
-                    updated = true;
-                } else {
-                    writer.write(line);
-                    writer.newLine();
-                }
-            }
-
-            // 변경 요청 반영 (또는 새로 추가)
-            if (!updated) {
-                writer.write(userId + "," + newTime + "," + newDay + "," + selectedRoom + "," + userName);
-                writer.newLine();
-            }
-
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/ChangeRequest.txt", true))) {
+            writer.write(userId + "," + newTime + "," + newDay + "," + selectedRoom + "," + userName);
+            writer.newLine();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(view, "변경 저장 중 오류: " + e.getMessage());
             return;
         }
 
-        if (!changeFile.delete() || !tempFile.renameTo(changeFile)) {
-            JOptionPane.showMessageDialog(view, "파일 갱신 중 오류가 발생했습니다.");
-            return;
-        }
+        String filePath = isLectureRoom(room) ? "data/ReserveClass.txt" : "data/ReserveLab.txt";
+        deleteReservationFromFile(filePath, userName, room, originalDay, originalTime);
+        model.removeRow(selectedRow);
 
-        JOptionPane.showMessageDialog(view, "변경 요청이 성공적으로 저장되었습니다.");
-        loadUserReservations(); // 테이블 갱신
+        JOptionPane.showMessageDialog(view, "변경 요청이 저장되고 기존 예약이 삭제되었습니다.");
     }
 
-    private void loadUserReservations() {
-        String userName = Session.getLoggedInUserName();
-        if (userName == null || userName.isEmpty()) {
+    private void handleReservationCancel() {
+        int selectedRow = view.getReservationTable().getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(view, "취소할 예약을 선택하세요.");
             return;
         }
 
         DefaultTableModel model = (DefaultTableModel) view.getReservationTable().getModel();
-        model.setRowCount(0); // 테이블 초기화
+        String time = (String) model.getValueAt(selectedRow, 1);
+        String day = (String) model.getValueAt(selectedRow, 2);
+        String room = (String) model.getValueAt(selectedRow, 3);
+        String userName = Session.getLoggedInUserName();
+        String filePath = isLectureRoom(room) ? "data/ReserveClass.txt" : "data/ReserveLab.txt";
 
-        // 1. 원본 예약 읽기
-        File originalFile = new File("data/ReserveClass.txt");
-        Map<String, String[]> reservationMap = new LinkedHashMap<>();
-        int idCounter = 1;
+        deleteReservationFromFile(filePath, userName, room, day, time);
+        model.removeRow(selectedRow);
 
-        String userId = Session.getLoggedInUserId(); // ← 사용자 ID를 직접 가져옴
+        JOptionPane.showMessageDialog(view, "예약이 취소되었습니다.");
+    }
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(originalFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 6 && parts[0].equals(userName)) {
-                    reservationMap.put(userId, new String[]{parts[3], parts[2], parts[1], parts[0]});
-                }
-            }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(view, "예약 정보 불러오기 오류: " + e.getMessage());
+    private void loadUserReservations() {
+        String userName = Session.getLoggedInUserName();
+        String userId = Session.getLoggedInUserId();
+        if (userName == null || userId == null || userName.isEmpty() || userId.isEmpty()) {
             return;
         }
 
-        // 2. 변경 요청 반영 (있다면 덮어쓰기)
-        File changeFile = new File("data/ChangeRequest.txt");
-        try (BufferedReader reader = new BufferedReader(new FileReader(changeFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 5 && parts[0].equals(userId)) {
-                    // parts = [userId, time, day, room]
-                    reservationMap.put(userId, new String[]{parts[1], parts[2], parts[3], userName});
+        DefaultTableModel model = (DefaultTableModel) view.getReservationTable().getModel();
+        model.setRowCount(0);
+
+        java.util.List<String[]> reservationList = new java.util.ArrayList<>();
+
+        File classFile = new File("data/ReserveClass.txt");
+        if (classFile.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(classFile))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 7 && parts[0].equals(userName)) {
+                        reservationList.add(new String[]{userId, parts[3], parts[2], parts[1], parts[0]});
+                    }
                 }
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(view, "ReserveClass.txt 읽기 오류: " + e.getMessage());
             }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(view, "변경 요청 정보 읽기 오류: " + e.getMessage());
         }
 
-        // 3. 최종 데이터 테이블에 반영
-        for (Map.Entry<String, String[]> entry : reservationMap.entrySet()) {
-            String id = entry.getKey();
-            String[] data = entry.getValue();
-            model.addRow(new Object[]{id, data[0], data[1], data[2], data[3]});
+        File labFile = new File("data/ReserveLab.txt");
+        if (labFile.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(labFile))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 7 && parts[0].equals(userName)) {
+                        reservationList.add(new String[]{userId, parts[3], parts[2], parts[1], parts[0]});
+                    }
+                }
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(view, "ReserveLab.txt 읽기 오류: " + e.getMessage());
+            }
         }
+
+        for (String[] data : reservationList) {
+            model.addRow(data);
+        }
+    }
+
+    private void deleteReservationFromFile(String filePath, String userName, String room, String day, String time) {
+        File inputFile = new File(filePath);
+        File tempFile = new File("data/temp.txt");
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",", -1);
+                if (parts.length >= 4) {
+                    String name = parts[0].trim();
+                    String r = parts[1].trim();
+                    String d = parts[2].trim();
+                    String t = parts[3].trim();
+
+                    if (name.equals(userName) && r.equals(room) && d.equals(day) && t.equals(time)) {
+                        System.out.println("삭제된 줄: " + line);
+                        continue;
+                    }
+                }
+
+                writer.write(line);
+                writer.newLine();
+            }
+
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(view, "파일 처리 중 오류: " + e.getMessage());
+        }
+
+        try {
+            java.nio.file.Files.delete(inputFile.toPath());
+            java.nio.file.Files.move(tempFile.toPath(), inputFile.toPath());
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(view, "파일 갱신 실패: " + e.getMessage());
+        }
+    }
+
+    private boolean isLectureRoom(String room) {
+        return room.equals("908호") || room.equals("912호") || room.equals("913호") || room.equals("914호");
     }
 }

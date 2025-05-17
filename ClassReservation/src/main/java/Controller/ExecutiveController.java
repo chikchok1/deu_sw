@@ -50,6 +50,13 @@ this.executive.getJButton5().addActionListener(new ActionListener() {
         openClientAdminView();
     }
 });
+// [5] "예약승인" 버튼 (jButton6)
+this.executive.getJButton6().addActionListener(new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        openReservationApprovalView();
+    }
+});
 
 
     }
@@ -82,6 +89,12 @@ private void logout() {
     ClientAdmin clientAdmin = new ClientAdmin(); // 뷰 인스턴스 생성
     new ClientAdminController(clientAdmin);      // 컨트롤러 연결
     clientAdmin.setVisible(true);                // 화면 표시
+}
+    private void openReservationApprovalView() {
+    executive.dispose(); // 현재 Executive 창 닫기
+    View.ClassroomReservationApproval approvalView = new View.ClassroomReservationApproval();
+    new Controller.ClassroomReservationApprovalController(approvalView); // 컨트롤러 연결
+    approvalView.setVisible(true); // 화면 보이기
 }
 
 }
