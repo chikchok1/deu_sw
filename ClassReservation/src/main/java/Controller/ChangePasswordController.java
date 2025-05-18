@@ -84,25 +84,20 @@ public class ChangePasswordController {
 
             JOptionPane.showMessageDialog(view, "비밀번호가 성공적으로 변경되었습니다.");
 
-            RoomSelect roomSelect = new RoomSelect();
-            new RoomSelectController(roomSelect);
-            roomSelect.setVisible(true);
-            view.dispose();
+            // [minju] GitHub Actions에서 창 띄우면 에러 발생해서, 화면 있을 때만 실행되게 분기 추가
+            if (!GraphicsEnvironment.isHeadless()) {
+                // 비밀번호 변경 완료 후 강의실 선택 화면으로 이동
+                RoomSelect roomSelect = new RoomSelect();
+                new RoomSelectController(roomSelect);
+                roomSelect.setVisible(true);
+            
+                // 현재 비밀번호 변경 창 닫기
+                view.dispose();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(view, "오류 발생: " + e.getMessage());
-        }
-        
-       // [minju] GitHub Actions에서 창 띄우면 에러 발생해서, 화면 있을 때만 실행되게 분기 추가
-        if (!GraphicsEnvironment.isHeadless()) {
-            // 비밀번호 변경 완료 후 강의실 선택 화면으로 이동
-            RoomSelect roomSelect = new RoomSelect();
-            new RoomSelectController(roomSelect);
-            roomSelect.setVisible(true);
-            
-            // 현재 비밀번호 변경 창 닫기
-            view.dispose();
         }
     }
 

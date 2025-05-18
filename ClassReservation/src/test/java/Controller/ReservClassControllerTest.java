@@ -14,10 +14,10 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import org.junit.jupiter.api.Disabled;
 
-
-import org.mockito.ArgumentCaptor;
 
 public class ReservClassControllerTest {
 
@@ -33,7 +33,7 @@ public class ReservClassControllerTest {
     void setUp() throws IOException {
         MockitoAnnotations.openMocks(this);
 
-        // 항상 파일 쓸 수 있게 복원
+        // 파일 초기화
         if (!file.exists()) file.createNewFile();
         file.setWritable(true);
         new FileWriter(file).close(); // 내용 비우기
@@ -42,25 +42,22 @@ public class ReservClassControllerTest {
         Session.setLoggedInUserId("S20230001");
         Session.setLoggedInUserName("김학생");
 
-        // Mock View 기본값 설정
+        // Mock View 설정
         when(mockView.getSelectedClassRoom()).thenReturn("908호");
         when(mockView.getSelectedDay()).thenReturn("월요일");
         when(mockView.getSelectedTime()).thenReturn("1교시(09:00~10:00)");
         when(mockView.getPurpose()).thenReturn("스터디");
 
-        // 버튼 및 컴포넌트 생성
         JButton mockBefore = new JButton();
         mockReservationButton = new JButton();
         when(mockView.getBeforeButton()).thenReturn(mockBefore);
         when(mockView.getClassComboBox()).thenReturn(new JComboBox<>());
 
-        // View 동작은 무시
         doNothing().when(mockView).showMessage(anyString());
         doNothing().when(mockView).closeView();
         doNothing().when(mockView).updateCalendarTable(any(JTable.class));
         doNothing().when(mockView).resetReservationButtonListener();
 
-        // 리스너를 mock 버튼에 붙이도록
         doAnswer(invocation -> {
             ActionListener listener = invocation.getArgument(0);
             mockReservationButton.addActionListener(listener);
@@ -74,13 +71,28 @@ public class ReservClassControllerTest {
     void testReserveRoom_Success() throws Exception {
         System.out.println("[정상 예약 테스트] 시작");
 
+        // 예약 정보 mock 재설정 (명확히 하기 위해)
+        when(mockView.getSelectedClassRoom()).thenReturn("908호");
+        when(mockView.getSelectedDay()).thenReturn("월요일");
+        when(mockView.getSelectedTime()).thenReturn("1교시");
+        when(mockView.getPurpose()).thenReturn("스터디");
+
+        // 예약 버튼 클릭 시뮬레이션
         for (ActionListener listener : mockReservationButton.getActionListeners()) {
             listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
         }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        // 파일 존재 확인
+        assertTrue(file.exists(), "예약 파일이 생성되지 않았습니다!");
+
+        // 파일 내용 출력 (디버깅용)
+        System.out.println("[파일 내용 확인]");
+        System.out.println(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
+
+        // 파일 내용 검증
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String line = br.readLine();
-            assertNotNull(line);
+            assertNotNull(line, "파일의 첫 줄이 null입니다. 예약이 기록되지 않았습니다.");
             assertTrue(line.contains("908호"));
             assertTrue(line.contains("월요일"));
             assertTrue(line.contains("1교시"));
@@ -88,7 +100,7 @@ public class ReservClassControllerTest {
             assertTrue(line.contains("예약됨"));
         }
 
-        System.out.println("[정상 예약 테스트] 통과 ");
+        System.out.println("[정상 예약 테스트] 통과");
     }
 
     @Test
@@ -112,7 +124,7 @@ public class ReservClassControllerTest {
 
         assertEquals(1, lineCount);
         verify(mockView).showMessage("이미 같은 강의실, 요일 및 시간에 예약이 존재합니다.");
-        System.out.println("[중복 예약 테스트] 통과 ");
+        System.out.println("[중복 예약 테스트] 통과");
     }
 
     @Test
@@ -130,44 +142,40 @@ public class ReservClassControllerTest {
         }
 
         verify(mockView).showMessage("사용 목적을 입력해주세요.");
-        System.out.println("[빈 목적 테스트] 통과 ");
+        System.out.println("[빈 목적 테스트] 통과");
     }
 
-    @Disabled("파일 잠금이 환경에 따라 실패해서 무시함")
+    @Disabled("환경 의존성으로 인해 파일 잠금 테스트는 생략함")
     @Test
     void testReserveRoom_FileWriteFailure() throws Exception {
-    // 파일을 미리 열어서 잠금 처리
-    FileWriter lock = new FileWriter("data/ReserveClass.txt");
-    lock.write(""); lock.flush(); // 파일 열기만 하고 닫지 않음
+        FileWriter lock = new FileWriter(file);
+        lock.write("");
+        lock.flush(); // 잠금
 
-    // 버튼 클릭 시도
-    for (ActionListener listener : mockReservationButton.getActionListeners()) {
-        listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+        for (ActionListener listener : mockReservationButton.getActionListeners()) {
+            listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+        }
+
+        verify(mockView).showMessage(startsWith("예약 중 오류 발생"));
+        lock.close();
     }
-
-    // 에러 메시지가 출력됐는지 확인
-    verify(mockView).showMessage(startsWith("예약 중 오류 발생"));
-    lock.close(); // 잠금 해제
-}
 
     @Test
     void testReserveRoom_WhenFileMissing_ShouldSucceed() throws Exception {
-    // 파일이 존재하지 않도록 삭제
-    File file = new File("data/ReserveClass.txt");
-    if (file.exists()) file.delete();
+        if (file.exists()) file.delete();
 
-    for (ActionListener listener : mockReservationButton.getActionListeners()) {
-        listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+        for (ActionListener listener : mockReservationButton.getActionListeners()) {
+            listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+        }
+
+        assertTrue(file.exists(), "파일이 생성되지 않았습니다.");
+        verify(mockView).showMessage(contains("예약이 완료되었습니다"));
     }
-
-    // 메시지 확인
-    verify(mockView).showMessage("예약이 완료되었습니다!");
-}
-
 
     @AfterEach
     void tearDown() {
         Session.clear();
-        file.setWritable(true); // 항상 복원
+        file.setWritable(true);
+        if (file.exists()) file.delete(); // 테스트 파일 정리
     }
 }
