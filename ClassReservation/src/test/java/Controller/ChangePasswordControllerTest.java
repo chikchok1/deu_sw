@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+
 public class ChangePasswordControllerTest {
 
     private ChangePasswordView mockView;
