@@ -17,6 +17,7 @@ import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.GraphicsEnvironment;
 
 public class ChangePasswordController {
 
@@ -31,7 +32,7 @@ public class ChangePasswordController {
         view.setSaveButtonListener(e -> changePassword());
     }
 
-    private void changePassword() {
+    public void changePassword() {
         String currentPassword = view.getPresentPassword().trim();
         String newPassword = view.getChangePassword().trim();
         String userId = Session.getLoggedInUserId();
@@ -83,10 +84,16 @@ public class ChangePasswordController {
 
             JOptionPane.showMessageDialog(view, "비밀번호가 성공적으로 변경되었습니다.");
 
-            RoomSelect roomSelect = new RoomSelect();
-            new RoomSelectController(roomSelect);
-            roomSelect.setVisible(true);
-            view.dispose();
+            // [minju] GitHub Actions에서 창 띄우면 에러 발생해서, 화면 있을 때만 실행되게 분기 추가
+            if (!GraphicsEnvironment.isHeadless()) {
+                // 비밀번호 변경 완료 후 강의실 선택 화면으로 이동
+                RoomSelect roomSelect = new RoomSelect();
+                new RoomSelectController(roomSelect);
+                roomSelect.setVisible(true);
+            
+                // 현재 비밀번호 변경 창 닫기
+                view.dispose();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -94,7 +101,7 @@ public class ChangePasswordController {
         }
     }
 
-    private String getFileNameByUserId(String userId) {
+    protected String getFileNameByUserId(String userId) {
         if (userId == null || userId.length() == 0) return null;
 
         switch (userId.charAt(0)) {
