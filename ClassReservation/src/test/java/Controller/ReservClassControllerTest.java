@@ -64,7 +64,10 @@ public class ReservClassControllerTest {
     @Test
     void testReserveRoom_Success() throws Exception {
         System.out.println("[정상 예약 테스트] 시작");
-
+        
+        // 시간 값을 실제 저장 형식에 맞춤 
+        when(mockView.getSelectedTime()).thenReturn("1교시(09:00~10:00)");
+        
         // 예약 버튼 클릭 시뮬레이션
         for (ActionListener listener : mockReservationButton.getActionListeners()) {
             listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
