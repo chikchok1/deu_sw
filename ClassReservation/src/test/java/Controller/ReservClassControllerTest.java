@@ -16,14 +16,11 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import org.junit.jupiter.api.Disabled;
-
 
 public class ReservClassControllerTest {
 
     @Mock
     ReservClassView mockView;
-
     ReservClassController controller;
     JButton mockReservationButton;
 
@@ -33,16 +30,13 @@ public class ReservClassControllerTest {
     void setUp() throws IOException {
         MockitoAnnotations.openMocks(this);
 
-        // 파일 초기화
         if (!file.exists()) file.createNewFile();
         file.setWritable(true);
-        new FileWriter(file).close(); // 내용 비우기
+        new FileWriter(file).close();
 
-        // 세션 설정
         Session.setLoggedInUserId("S20230001");
         Session.setLoggedInUserName("김학생");
 
-        // Mock View 설정
         when(mockView.getSelectedClassRoom()).thenReturn("908호");
         when(mockView.getSelectedDay()).thenReturn("월요일");
         when(mockView.getSelectedTime()).thenReturn("1교시(09:00~10:00)");
@@ -71,31 +65,22 @@ public class ReservClassControllerTest {
     void testReserveRoom_Success() throws Exception {
         System.out.println("[정상 예약 테스트] 시작");
 
-        // 예약 정보 mock 재설정 (명확히 하기 위해)
-        when(mockView.getSelectedClassRoom()).thenReturn("908호");
-        when(mockView.getSelectedDay()).thenReturn("월요일");
-        when(mockView.getSelectedTime()).thenReturn("1교시");
-        when(mockView.getPurpose()).thenReturn("스터디");
-
         // 예약 버튼 클릭 시뮬레이션
         for (ActionListener listener : mockReservationButton.getActionListeners()) {
             listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
         }
 
-        // 파일 존재 확인
         assertTrue(file.exists(), "예약 파일이 생성되지 않았습니다!");
 
-        // 파일 내용 출력 (디버깅용)
         System.out.println("[파일 내용 확인]");
         System.out.println(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
 
-        // 파일 내용 검증
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String line = br.readLine();
             assertNotNull(line, "파일의 첫 줄이 null입니다. 예약이 기록되지 않았습니다.");
             assertTrue(line.contains("908호"));
             assertTrue(line.contains("월요일"));
-            assertTrue(line.contains("1교시"));
+            assertTrue(line.contains("1교시(09:00~10:00)"));
             assertTrue(line.contains("스터디"));
             assertTrue(line.contains("예약됨"));
         }
@@ -150,7 +135,7 @@ public class ReservClassControllerTest {
     void testReserveRoom_FileWriteFailure() throws Exception {
         FileWriter lock = new FileWriter(file);
         lock.write("");
-        lock.flush(); // 잠금
+        lock.flush();
 
         for (ActionListener listener : mockReservationButton.getActionListeners()) {
             listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
@@ -164,6 +149,12 @@ public class ReservClassControllerTest {
     void testReserveRoom_WhenFileMissing_ShouldSucceed() throws Exception {
         if (file.exists()) file.delete();
 
+        // 예약 정보 재설정 (mockView가 초기화되어 있음)
+        when(mockView.getSelectedClassRoom()).thenReturn("908호");
+        when(mockView.getSelectedDay()).thenReturn("월요일");
+        when(mockView.getSelectedTime()).thenReturn("1교시(09:00~10:00)");
+        when(mockView.getPurpose()).thenReturn("스터디");
+
         for (ActionListener listener : mockReservationButton.getActionListeners()) {
             listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
         }
@@ -176,6 +167,6 @@ public class ReservClassControllerTest {
     void tearDown() {
         Session.clear();
         file.setWritable(true);
-        if (file.exists()) file.delete(); // 테스트 파일 정리
+        if (file.exists()) file.delete();
     }
 }
