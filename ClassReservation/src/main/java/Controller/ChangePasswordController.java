@@ -31,7 +31,7 @@ public class ChangePasswordController {
         view.setSaveButtonListener(e -> changePassword());
     }
 
-    private void changePassword() {
+    public void changePassword() {
         String currentPassword = view.getPresentPassword().trim();
         String newPassword = view.getChangePassword().trim();
         String userId = Session.getLoggedInUserId();
@@ -94,7 +94,7 @@ public class ChangePasswordController {
         }
     }
 
-    private String getFileNameByUserId(String userId) {
+    protected String getFileNameByUserId(String userId) {
         if (userId == null || userId.length() == 0) return null;
 
         switch (userId.charAt(0)) {
