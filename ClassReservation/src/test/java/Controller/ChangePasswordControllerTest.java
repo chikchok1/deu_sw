@@ -11,7 +11,6 @@ import javax.swing.JOptionPane;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-
 public class ChangePasswordControllerTest {
 
     private ChangePasswordView mockView;
@@ -57,12 +56,12 @@ public class ChangePasswordControllerTest {
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
-         e.printStackTrace();
+            e.printStackTrace();
         }
 
-     Files.deleteIfExists(Paths.get(TEST_FILE));
+        Files.deleteIfExists(Paths.get(TEST_FILE));
     }
-    
+
     @Test
     void testChangePasswordSuccess() throws IOException {
         Assumptions.assumeFalse(System.getenv().containsKey("CI"), "CI 환경에서는 테스트 건너뜀");
@@ -86,7 +85,7 @@ public class ChangePasswordControllerTest {
         String content = Files.readString(Paths.get(TEST_FILE));
         Assertions.assertTrue(content.contains("S1234,oldpass")); // 변경되지 않아야 함
     }
-    
+
     @Test
     void testEmptyFields() {
         Assumptions.assumeFalse(System.getenv().containsKey("CI"), "CI 환경에서는 테스트 건너뜀");
@@ -97,19 +96,19 @@ public class ChangePasswordControllerTest {
 
         // 단순히 에러 없이 실행되었는지만 확인
         Assertions.assertTrue(new File(TEST_FILE).exists());
-    }   
+    }
 
     @Test
     void testUserNotFound() throws IOException {
         Assumptions.assumeFalse(System.getenv().containsKey("CI"), "CI 환경에서는 테스트 건너뜀");
         // 파일 내용 변경 (다른 ID로)
         Files.writeString(Paths.get(TEST_FILE), "학생,S9999,oldpass\n");
-        
+
         when(mockView.getPresentPassword()).thenReturn("oldpass");
         when(mockView.getChangePassword()).thenReturn("newpass");
-        
+
         controller.changePassword();
-        
+
         String content = Files.readString(Paths.get(TEST_FILE));
         Assertions.assertTrue(content.contains("S9999,oldpass")); // 변경되지 않아야 함
     }
