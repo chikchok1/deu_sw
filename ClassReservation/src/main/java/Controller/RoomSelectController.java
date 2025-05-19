@@ -1,5 +1,6 @@
 package Controller;
 
+import Model.Session;
 import Model.UserDAO;
 import View.ChangePasswordView;
 import View.RoomSelect;
@@ -8,6 +9,10 @@ import View.ReservLabView;
 import View.LoginForm;
 import View.Reservationchangeview;
 import View.ReservedRoomView;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 public class RoomSelectController {
 
@@ -63,9 +68,42 @@ public class RoomSelectController {
         view.dispose();
     }
 
+    private void logoutAndCloseSocket() {
+        try {
+            PrintWriter out = Session.getOut();
+            BufferedReader in = Session.getIn();
+            Socket socket = Session.getSocket();
+
+            if (out != null) {
+                out.println("EXIT");
+                out.flush();
+                System.out.println("EXIT 메시지 전송됨");
+            }
+
+            if (in != null) {
+                String response = in.readLine();
+                if ("LOGOUT_SUCCESS".equals(response)) {
+                    System.out.println("서버로부터 로그아웃 확인 받음");
+                }
+            }
+
+            Session.clear();
+
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+                System.out.println("소켓 정상 종료");
+            }
+
+        } catch (IOException e) {
+            System.out.println("소켓 종료 중 오류 발생: " + e.getMessage());
+        }
+    }
+
     private void handleLogout() {
 
         System.out.println("로그아웃 버튼 클릭됨 - RoomSelect 종료 시도");
+        // 서버에 로그아웃 요청 및 소켓 종료
+        logoutAndCloseSocket();
 
         RoomSelect.destroyInstance(); // 인스턴스 초기화
         view.dispose();
