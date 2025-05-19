@@ -1,11 +1,6 @@
 package Controller;
 
 import View.RoomSelect;
-import View.ReservClassView;
-import View.ReservLabView;
-import View.ReservedRoomView;
-import View.ChangePasswordView;
-import View.LoginForm;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,12 +20,18 @@ import static org.mockito.Mockito.*;
 @MockitoSettings(strictness = Strictness.LENIENT) // 불필요한 stubbing 경고 제거
 class RoomSelectControllerTest {
 
-    @Mock private RoomSelect mockView;
-    @Mock private JButton mockClassButton;
-    @Mock private JButton mockLabButton;
-    @Mock private JButton mockViewReservedButton;
-    @Mock private JButton mockLogoutButton;
-    @Mock private JButton mockChangePwButton;
+    @Mock
+    private RoomSelect mockView;
+    @Mock
+    private JButton mockClassButton;
+    @Mock
+    private JButton mockLabButton;
+    @Mock
+    private JButton mockViewReservedButton;
+    @Mock
+    private JButton mockLogoutButton;
+    @Mock
+    private JButton mockChangePwButton;
 
     private RoomSelectController controller;
     private ActionListener classButtonListener;
