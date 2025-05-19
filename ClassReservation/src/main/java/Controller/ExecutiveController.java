@@ -70,18 +70,21 @@ private void logout() {
         ReservedRoomView reservedView = new ReservedRoomView();
         new ReservedRoomController(reservedView); // 컨트롤러 연결
         reservedView.setVisible(true);
+        executive.dispose();
     }
 
     private void openRoomAdminView() {
         RoomAdmin roomAdmin = new RoomAdmin();
         new RoomAdminController(roomAdmin); // 컨트롤러 연결 (있다면)
         roomAdmin.setVisible(true);
+        executive.dispose();
     }
     
     private void openClientAdminView() {
     ClientAdmin clientAdmin = new ClientAdmin(); // 뷰 인스턴스 생성
     new ClientAdminController(clientAdmin);      // 컨트롤러 연결
-    clientAdmin.setVisible(true);                // 화면 표시
+    clientAdmin.setVisible(true);  // 화면 표시
+    executive.dispose();
 }
 
 }
