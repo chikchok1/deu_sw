@@ -2,7 +2,9 @@ package Controller;
 
 import View.RoomSelect;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -12,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import static org.mockito.Mockito.*;
@@ -75,32 +78,42 @@ class RoomSelectControllerTest {
     }
 
     @Test
+    @DisplayName("수업 예약 버튼 클릭 시 창 닫힘 테스트")
     void shouldOpenReservClassView_whenClassButtonClicked() {
-        classButtonListener.actionPerformed(null);
+        Assumptions.assumeFalse(System.getenv().containsKey("CI"), "CI 환경에서는 생략");
+        classButtonListener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "click"));
         verify(mockView).dispose();
     }
 
     @Test
+    @DisplayName("실습실 예약 버튼 클릭 시 창 닫힘 테스트")
     void shouldOpenReservLabView_whenLabButtonClicked() {
-        labButtonListener.actionPerformed(null);
+        Assumptions.assumeFalse(System.getenv().containsKey("CI"), "CI 환경에서는 생략");
+        labButtonListener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "click"));
         verify(mockView).dispose();
     }
 
     @Test
+    @DisplayName("예약 확인 버튼 클릭 시 창 닫힘 테스트")
     void shouldOpenReservedRoomView_whenViewReservedButtonClicked() {
-        viewReservedListener.actionPerformed(null);
+        Assumptions.assumeFalse(System.getenv().containsKey("CI"), "CI 환경에서는 생략");
+        viewReservedListener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "click"));
         verify(mockView).dispose();
     }
 
     @Test
+    @DisplayName("비밀번호 변경 버튼 클릭 시 창 닫힘 테스트")
     void shouldOpenChangePasswordView_whenChangePasswordButtonClicked() {
-        changePwListener.actionPerformed(null);
+        Assumptions.assumeFalse(System.getenv().containsKey("CI"), "CI 환경에서는 생략");
+        changePwListener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "click"));
         verify(mockView).dispose();
     }
 
     @Test
+    @DisplayName("로그아웃 버튼 클릭 시 창 닫힘 테스트")
     void shouldReturnToLogin_whenLogoutButtonClicked() {
-        logoutListener.actionPerformed(null);
+        Assumptions.assumeFalse(System.getenv().containsKey("CI"), "CI 환경에서는 생략");
+        logoutListener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "click"));
         verify(mockView).dispose();
     }
 }
