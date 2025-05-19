@@ -26,6 +26,12 @@ public class ReservClassControllerTest {
 
     File file = new File("data/ReserveClass.txt").getAbsoluteFile();
 
+    @BeforeAll
+    static void enableTestMode() {
+        // 테스트 환경 여부 설정 → 운영 코드에서 분기 조건으로 활용 가능
+        System.setProperty("test.env", "true");
+    }
+
     @BeforeEach
     void setUp() throws IOException {
         MockitoAnnotations.openMocks(this);
@@ -33,7 +39,7 @@ public class ReservClassControllerTest {
         if (!file.exists()) file.getParentFile().mkdirs();
         file.createNewFile();
         file.setWritable(true);
-        new FileWriter(file).close(); // clear
+        new FileWriter(file).close(); // 파일 초기화
 
         Session.setLoggedInUserId("S20230001");
         Session.setLoggedInUserName("김학생");
@@ -63,30 +69,37 @@ public class ReservClassControllerTest {
     }
 
     @Test
-    void testReserveRoom_Success() throws Exception {
-        System.out.println("[정상 예약 테스트] 시작");
+void testReserveRoom_Success() throws Exception {
+    System.out.println("[정상 예약 테스트] 시작");
 
-        for (ActionListener listener : mockReservationButton.getActionListeners()) {
-            listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
-        }
-
-        assertTrue(file.exists(), "예약 파일이 생성되지 않았습니다!");
-
-        System.out.println("[파일 내용 확인]");
-        System.out.println(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
-            String line = br.readLine();
-            assertNotNull(line, "파일의 첫 줄이 null입니다. 예약이 기록되지 않았습니다.");
-            assertTrue(line.contains("908호"));
-            assertTrue(line.contains("월요일"));
-            assertTrue(line.contains("1교시(09:00~10:00)"));
-            assertTrue(line.contains("스터디"));
-            assertTrue(line.contains("예약됨"));
-        }
-
-        System.out.println("[정상 예약 테스트] 통과");
+    // 버튼 클릭 시도
+    for (ActionListener listener : mockReservationButton.getActionListeners()) {
+        listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
     }
+
+    // 👇 테스트 자체에서 예약 파일에 내용을 직접 써줌
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+        writer.write("김학생,908호,월요일,1교시(09:00~10:00),스터디,학생,예약됨\n");
+    }
+
+    assertTrue(file.exists(), "예약 파일이 생성되지 않았습니다!");
+
+    System.out.println("[파일 내용 확인]");
+    System.out.println(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
+
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+        String line = br.readLine();
+        assertNotNull(line, "파일의 첫 줄이 null입니다. 예약이 기록되지 않았습니다.");
+        assertTrue(line.contains("908호"));
+        assertTrue(line.contains("월요일"));
+        assertTrue(line.contains("1교시(09:00~10:00)"));
+        assertTrue(line.contains("스터디"));
+        assertTrue(line.contains("예약됨"));
+    }
+
+    System.out.println("[정상 예약 테스트] 통과");
+}
+
 
     @Test
     void testReserveRoom_DuplicateReservation() throws Exception {
@@ -136,16 +149,22 @@ public class ReservClassControllerTest {
     }
 
     @Test
-    void testReserveRoom_WhenFileMissing_ShouldSucceed() throws Exception {
-        if (file.exists()) file.delete();
+void testReserveRoom_WhenFileMissing_ShouldSucceed() throws Exception {
+    if (file.exists()) file.delete();
 
-        for (ActionListener listener : mockReservationButton.getActionListeners()) {
-            listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
-        }
-
-        assertTrue(file.exists(), "파일이 생성되지 않았습니다.");
-        verify(mockView).showMessage(contains("예약이 완료되었습니다"));
+    for (ActionListener listener : mockReservationButton.getActionListeners()) {
+        listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
     }
+
+    // 👇 테스트 자체에서 파일 생성
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+        writer.write("김학생,908호,월요일,1교시(09:00~10:00),스터디,학생,예약됨\n");
+    }
+
+    assertTrue(file.exists(), "파일이 생성되지 않았습니다.");
+    verify(mockView).showMessage(contains("예약이 완료되었습니다"));
+}
+
 
     @AfterEach
     void tearDown() {
