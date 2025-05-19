@@ -135,6 +135,8 @@ public class LoginServer {
             while (true) {
                 String msg = in.readLine();
                 if (msg == null || msg.equalsIgnoreCase("EXIT")) {
+                            out.println("LOGOUT_SUCCESS"); // 로그아웃 성공 응답 전송
+
                     break;
                 }
 

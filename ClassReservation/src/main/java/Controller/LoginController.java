@@ -137,22 +137,40 @@ public class LoginController {
         }
     }
 
-    private void logoutAndCloseSocket() {
-        try {
-            PrintWriter out = Session.getOut();
-            if (out != null) {
-                out.println("EXIT");
-            }
+  private void logoutAndCloseSocket() {
+    try {
+        PrintWriter out = Session.getOut();
+        BufferedReader in = Session.getIn();
+        Socket socket = Session.getSocket(); // 소켓도 가져옴
 
-            Socket socket = Session.getSocket();
-            if (socket != null && !socket.isClosed()) {
-                socket.close();
-            }
-
-        } catch (IOException e) {
-            System.out.println("소켓 종료 중 오류 발생: " + e.getMessage());
+        if (out != null) {
+            out.println("EXIT");
+            out.flush(); // 버퍼 강제 비움
+            System.out.println("EXIT 메시지 전송됨");
         }
+
+        // 서버로부터 로그아웃 확인 응답을 받도록 추가
+        if (in != null) {
+            String response = in.readLine();
+            if (response != null && response.equals("LOGOUT_SUCCESS")) {
+                System.out.println("서버로부터 로그아웃 확인 받음");
+            }
+        }
+
+        // 세션 정리
+        Session.clear();
+
+        // 소켓 닫기
+        if (socket != null && !socket.isClosed()) {
+            socket.close();
+            System.out.println("소켓 정상 종료");
+        }
+
+    } catch (IOException e) {
+        System.out.println("소켓 종료 중 오류 발생: " + e.getMessage());
     }
+}
+
 
     private void closeConnection(Socket socket, BufferedReader in, PrintWriter out) {
         try {
