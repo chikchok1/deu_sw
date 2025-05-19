@@ -142,6 +142,26 @@ public class UserDAO {
         }
         return null;
     }
+    public synchronized String getUserIdByName(String name) {
+    String[] files = {USER_FILE, PROF_FILE, ASSISTANT_FILE};
+
+    for (String fileName : files) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 2 && tokens[0].trim().equals(name)) {
+                    return tokens[1].trim(); // 이름이 일치하면 해당 ID 반환
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("getUserIdByName 읽기 오류: " + e.getMessage());
+        }
+    }
+
+    return name; // 이름이 없으면 그대로 반환 (임시 fallback)
+}
+
 }
 
 /*학번 유효성 검사

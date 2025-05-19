@@ -196,6 +196,11 @@ public class ClassroomReservationApproval extends javax.swing.JFrame {
             }
         });
     }
+    
+        public void setReservationId(String id) {
+        jTextField1.setText(id);
+        }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;

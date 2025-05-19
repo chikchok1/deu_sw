@@ -73,6 +73,12 @@ public class ReservationchangeviewController {
             return;
         }
 
+        // ✅ 중복 예약 확인
+        if (isConflictExists(selectedRoom, newDay, newTime)) {
+            JOptionPane.showMessageDialog(view, "이미 해당 시간에 예약된 강의실입니다. 다른 시간/강의실을 선택해주세요.");
+            return;
+        }
+
         File changeFile = new File("data/ChangeRequest.txt");
         if (changeFile.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(changeFile))) {
@@ -109,6 +115,35 @@ public class ReservationchangeviewController {
         model.removeRow(selectedRow);
 
         JOptionPane.showMessageDialog(view, "변경 요청이 저장되고 기존 예약이 삭제되었습니다.");
+    }
+
+    private boolean isConflictExists(String room, String day, String time) {
+        String[] files = {"data/ReserveClass.txt", "data/ReserveLab.txt"};
+
+        for (String filePath : files) {
+            File file = new File(filePath);
+            if (!file.exists()) continue;
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 7) {
+                        String existingRoom = parts[1].trim();
+                        String existingDay = parts[2].trim();
+                        String existingTime = parts[3].trim();
+                        String status = parts[6].trim();
+
+                        if (room.equals(existingRoom) && day.equals(existingDay) && time.equals(existingTime) && status.equals("예약됨")) {
+                            return true;
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(view, "중복 확인 중 오류 발생: " + e.getMessage());
+            }
+        }
+        return false;
     }
 
     private void handleReservationCancel() {
