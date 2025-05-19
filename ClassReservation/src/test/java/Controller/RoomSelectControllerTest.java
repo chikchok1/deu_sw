@@ -22,7 +22,7 @@ import java.awt.event.ActionListener;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT) // ✅ 불필요한 stubbing 경고 제거
+@MockitoSettings(strictness = Strictness.LENIENT) // 불필요한 stubbing 경고 제거
 class RoomSelectControllerTest {
 
     @Mock private RoomSelect mockView;
