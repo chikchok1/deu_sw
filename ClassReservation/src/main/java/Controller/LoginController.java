@@ -1,8 +1,9 @@
+
 package Controller;
 
 import Model.MembershipModel;
+import Model.Session;
 import Model.UserDAO;
-import Model.Session; // 추가: Session 가져오기
 import View.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,8 +14,8 @@ import utils.ConfigLoader;
 
 public class LoginController {
 
-    private LoginForm view;
-    private UserDAO dao;
+    private final LoginForm view;
+    private final UserDAO dao;
     private MembershipView membershipView;
 
     public LoginController(LoginForm view, UserDAO dao) {
@@ -24,70 +25,102 @@ public class LoginController {
         this.view.addLoginListener(e -> handleLogin());
         this.view.addJoinListener(e -> openMembership());
     }
- // GitHub Actions 동작 확인용 커밋
 
-/**
- * [테스트 용도로만 public 처리함]
- */
-public void handleLogin() {
-    String id = view.getUserId();
-    String password = view.getPassword();
+    public void handleLogin() {
+        String id = view.getUserId();
+        String password = view.getPassword();
 
-    String serverIp = ConfigLoader.getProperty("server.ip");
-    int serverPort = Integer.parseInt(ConfigLoader.getProperty("server.port"));
-
-    try (
-        Socket socket = new Socket(serverIp, serverPort);
-        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-    ) {
-        out.println("LOGIN," + id + "," + password);
-
-        // 서버 응답 처리
-        String response = in.readLine();
-        if (response != null && response.startsWith("SUCCESS")) {
-            String[] parts = response.split(",", 2);
-            String userName = parts.length > 1 ? parts[1] : "이름없음";
-
-            // 세션 저장
-            Session.setLoggedInUserId(id);
-            Session.setLoggedInUserName(userName);
-
-            view.showMessage("로그인 성공!");
-            view.dispose();
-            openUserMainView(id.charAt(0));
-        } else {
-            view.showMessage("로그인 실패: 아이디 또는 비밀번호가 틀렸습니다.");
+        if (id.isEmpty() || password.isEmpty()) {
+            view.showMessage("아이디와 비밀번호를 모두 입력하세요.");
+            return;
         }
-    } catch (IOException e) {
-        view.showMessage("서버와 연결할 수 없습니다: " + e.getMessage());
-    }
-}
 
+        String serverIp = ConfigLoader.getProperty("server.ip");
+        int serverPort = Integer.parseInt(ConfigLoader.getProperty("server.port"));
+
+        try {
+            Socket socket = new Socket(serverIp, serverPort);
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            out.println("LOGIN," + id + "," + password);
+            String response = in.readLine();
+
+            if (response == null) {
+                view.showMessage("서버로부터 응답이 없습니다.");
+                closeConnection(socket, in, out);
+                return;
+            }
+
+            switch (response.split(",")[0]) {
+                case "SERVER_BUSY":
+                    view.showMessage("현재 접속 인원이 초과되었습니다. 나중에 다시 시도해주세요.");
+                    closeConnection(socket, in, out);
+                    break;
+
+                case "ALREADY_LOGGED_IN":
+                    view.showMessage("이미 로그인된 사용자입니다. 다른 사용자 계정으로 로그인하거나 나중에 다시 시도하세요.");
+                    closeConnection(socket, in, out);
+                    break;
+
+                case "SUCCESS":
+                    String userName = response.split(",").length > 1 ? response.split(",")[1] : "이름없음";
+                    Session.setLoggedInUserId(id);
+                    Session.setLoggedInUserName(userName);
+                    Session.setSocket(socket);
+                    Session.setIn(in);
+                    Session.setOut(out);
+
+                    view.showMessage("로그인 성공!");
+                    view.dispose();
+                    openUserMainView(id.charAt(0));
+                    break;
+
+                case "FAIL":
+                default:
+                    view.showMessage("로그인 실패: 아이디 또는 비밀번호가 틀렸습니다.");
+                    closeConnection(socket, in, out);
+                    break;
+            }
+
+        } catch (IOException e) {
+            view.showMessage("서버와 연결할 수 없습니다: " + e.getMessage());
+        }
+    }
 
     private void openUserMainView(char userType) {
         switch (userType) {
             case 'S': // 학생
-            case 'P': // 교수도 같은 화면으로 이동
-                
-                 // 이미 열려 있는 RoomSelect 닫기
-            for (java.awt.Window window : java.awt.Window.getWindows()) {
-                if (window instanceof RoomSelect) {
-                    window.dispose();
-                }
-                }
+            case 'P': // 교수
                 RoomSelect roomSelect = new RoomSelect();
                 new RoomSelectController(roomSelect);
+
+                roomSelect.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        logoutAndCloseSocket();
+                    }
+                });
+
                 roomSelect.setVisible(true);
                 break;
+
             case 'A': // 조교
                 Executive executive = new Executive();
-                new ExecutiveController(executive); // 버튼 기능 연결
+                new ExecutiveController(executive);
+
+                executive.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        logoutAndCloseSocket();
+                    }
+                });
+
                 executive.setVisible(true);
                 break;
 
             default:
-                System.out.println("알 수 없는 사용자 타입: " + userType);
+                System.out.println("알 수 없는 사용자 유형입니다: " + userType);
                 break;
         }
     }
@@ -102,5 +135,30 @@ public void handleLogin() {
             view.setVisible(false);
             membershipView.setVisible(true);
         }
+    }
+
+    private void logoutAndCloseSocket() {
+        try {
+            PrintWriter out = Session.getOut();
+            if (out != null) {
+                out.println("EXIT");
+            }
+
+            Socket socket = Session.getSocket();
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+
+        } catch (IOException e) {
+            System.out.println("소켓 종료 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    private void closeConnection(Socket socket, BufferedReader in, PrintWriter out) {
+        try {
+            if (out != null) out.close();
+            if (in != null) in.close();
+            if (socket != null && !socket.isClosed()) socket.close();
+        } catch (IOException ignored) {}
     }
 }
