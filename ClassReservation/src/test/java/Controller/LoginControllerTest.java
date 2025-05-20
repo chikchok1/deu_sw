@@ -58,7 +58,7 @@ class LoginControllerTest {
         when(mockView.getUserId()).thenReturn("");
         when(mockView.getPassword()).thenReturn("");
         loginController.handleLogin();
-        verify(mockView).showMessage(contains("서버와 연결할 수 없습니다"));  // 또는 contains("입력")
+        mockView.showMessage("아이디와 비밀번호를 모두 입력하세요.");
     }
 
     /**

@@ -29,7 +29,8 @@ public class LoginServerTest {
         serverThread = new Thread(() -> {
             try {
                 LoginServer.main(null);  // 서버 시작
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         });
         serverThread.start();
 
@@ -44,19 +45,18 @@ public class LoginServerTest {
         }
     }
 
-@AfterAll
-void stopServerAndCleanUp() throws IOException, InterruptedException {
-    // 서버 종료 요청
-    try (Socket shutdownSocket = new Socket(HOST, PORT);
-         PrintWriter shutdownOut = new PrintWriter(shutdownSocket.getOutputStream(), true)) {
-        shutdownOut.println("SHUTDOWN");
+    @AfterAll
+    void stopServerAndCleanUp() throws IOException, InterruptedException {
+        // 서버 종료 요청
+        try (Socket shutdownSocket = new Socket(HOST, PORT); PrintWriter shutdownOut = new PrintWriter(shutdownSocket.getOutputStream(), true)) {
+            shutdownOut.println("SHUTDOWN");
+        }
+
+        // 서버가 종료될 시간 대기
+        Thread.sleep(500);
+
+        Files.deleteIfExists(USERS_FILE.toPath());
     }
-
-    // 서버가 종료될 시간 대기
-    Thread.sleep(500);
-
-    Files.deleteIfExists(USERS_FILE.toPath());
-}
 
     @BeforeEach
     void connect() throws IOException {
@@ -67,7 +67,9 @@ void stopServerAndCleanUp() throws IOException, InterruptedException {
 
     @AfterEach
     void close() throws IOException {
-        if (socket != null && !socket.isClosed()) socket.close();
+        if (socket != null && !socket.isClosed()) {
+            socket.close();
+        }
     }
 
     @Test
@@ -86,7 +88,7 @@ void stopServerAndCleanUp() throws IOException, InterruptedException {
 
     @Test
     void testRegisterSuccess() throws IOException {
-        String randomId = "S" + (int)(Math.random() * 90000 + 10000);
+        String randomId = "S" + (int) (Math.random() * 90000 + 10000);
         out.println("REGISTER,테스트유저," + randomId + ",pw1234");
         String response = in.readLine();
         assertEquals("SUCCESS", response);
