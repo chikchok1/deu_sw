@@ -1,5 +1,8 @@
 package Controller;
-
+/**
+ *
+ * @author minju
+ */
 import Model.Session;
 import View.ChangePasswordView;
 import org.junit.jupiter.api.*;

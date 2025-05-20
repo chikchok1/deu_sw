@@ -1,5 +1,8 @@
 package Controller;
-
+/**
+ *
+ * @author minju
+ */
 import Model.UserDAO;
 import Model.Session;
 import View.LoginForm;

@@ -6,7 +6,7 @@ package Server;
 // 미리 Server를 실행해둔 상태여야함. 
 /**
  *
- * @author user
+ * @author minju
  */
 
 import org.junit.jupiter.api.*;
