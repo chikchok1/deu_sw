@@ -1,5 +1,8 @@
 package Controller;
-
+/**
+ *
+ * @author minju
+ */
 import View.RoomSelect;
 
 import org.junit.jupiter.api.Assumptions;

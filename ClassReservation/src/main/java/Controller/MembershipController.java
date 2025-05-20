@@ -71,11 +71,11 @@ public class MembershipController {
         });
     }
 
-    private boolean isValidId(String userId) {
+    boolean isValidId(String userId) {
         return userId.matches("[SPA][0-9]{3}");
     }
 
-    private boolean isValidPassword(String password) {
+    boolean isValidPassword(String password) {
         return password.length() >= 4 && password.length() <= 8;
     }
 }

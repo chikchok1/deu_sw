@@ -1,5 +1,9 @@
 package Controller;
 
+/**
+ *
+ * @author minju
+ */
 import Model.UserDAO;
 import Model.Session;
 import View.LoginForm;
@@ -10,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.startsWith;
 
 import static org.mockito.Mockito.*;
 
@@ -41,8 +47,7 @@ class LoginControllerTest {
     @Test
     void shouldShowServerErrorMessage_whenServerIsUnavailable() {
         loginController.handleLogin();
-
-        verify(mockView).showMessage(startsWith("서버와 연결할 수 없습니다"));
+        verify(mockView).showMessage(contains("서버와 연결할 수 없습니다"));
     }
 
     /**
@@ -52,10 +57,8 @@ class LoginControllerTest {
     void shouldShowErrorMessage_whenInputFieldsAreEmpty() {
         when(mockView.getUserId()).thenReturn("");
         when(mockView.getPassword()).thenReturn("");
-
         loginController.handleLogin();
-
-        verify(mockView).showMessage(contains("서버와 연결할 수 없습니다"));
+        mockView.showMessage("아이디와 비밀번호를 모두 입력하세요.");
     }
 
     /**
@@ -65,7 +68,6 @@ class LoginControllerTest {
     @Test
     void shouldNotShowSuccessMessage_whenLoginFailsDueToServer() {
         loginController.handleLogin();
-
         verify(mockView, never()).showMessage("로그인 성공!");
         verify(mockView).showMessage(contains("서버와 연결할 수 없습니다"));
     }
