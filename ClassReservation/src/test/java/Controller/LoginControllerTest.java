@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.startsWith;
 
 import static org.mockito.Mockito.*;
 
@@ -45,7 +47,7 @@ class LoginControllerTest {
     @Test
     void shouldShowServerErrorMessage_whenServerIsUnavailable() {
         loginController.handleLogin();
-        verify(mockView).showMessage(contains("로그인 실패"));
+        verify(mockView).showMessage(contains("서버와 연결할 수 없습니다"));
     }
 
     /**
@@ -56,7 +58,7 @@ class LoginControllerTest {
         when(mockView.getUserId()).thenReturn("");
         when(mockView.getPassword()).thenReturn("");
         loginController.handleLogin();
-        verify(mockView).showMessage(contains("로그인 실패"));
+        verify(mockView).showMessage(contains("서버와 연결할 수 없습니다"));  // 또는 contains("입력")
     }
 
     /**
@@ -67,7 +69,7 @@ class LoginControllerTest {
     void shouldNotShowSuccessMessage_whenLoginFailsDueToServer() {
         loginController.handleLogin();
         verify(mockView, never()).showMessage("로그인 성공!");
-        verify(mockView).showMessage(contains("로그인 실패"));
+        verify(mockView).showMessage(contains("서버와 연결할 수 없습니다"));
     }
 
     /**

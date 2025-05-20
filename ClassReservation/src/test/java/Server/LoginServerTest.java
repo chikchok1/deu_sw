@@ -1,25 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Server;
-// 미리 Server를 실행해둔 상태여야함. 
-/**
- *
- * @author minju
- */
 
+import Model.User;
+import Model.UserDAO;
 import org.junit.jupiter.api.*;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class LoginServerTest {
+public class LoginServerTest {
 
     private static final String HOST = "localhost";
     private static final int PORT = 5000;
@@ -29,15 +21,42 @@ class LoginServerTest {
     private BufferedReader in;
     private PrintWriter out;
 
+    private Thread serverThread;
+
     @BeforeAll
-    void setupTestUserFile() throws IOException {
+    void startServerAndPrepareFile() throws Exception {
+        // 서버를 별도 스레드로 실행
+        serverThread = new Thread(() -> {
+            try {
+                LoginServer.main(null);  // 서버 시작
+            } catch (Exception ignored) {}
+        });
+        serverThread.start();
+
+        // 서버가 올라올 때까지 대기
+        Thread.sleep(1000);
+
         // 테스트용 유저 등록
-        USERS_FILE.getParentFile().mkdirs();  // 폴더 없을 수도 있음
+        USERS_FILE.getParentFile().mkdirs();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(USERS_FILE))) {
             writer.write("홍길동,S20230001,abc123");
             writer.newLine();
         }
     }
+
+@AfterAll
+void stopServerAndCleanUp() throws IOException, InterruptedException {
+    // 서버 종료 요청
+    try (Socket shutdownSocket = new Socket(HOST, PORT);
+         PrintWriter shutdownOut = new PrintWriter(shutdownSocket.getOutputStream(), true)) {
+        shutdownOut.println("SHUTDOWN");
+    }
+
+    // 서버가 종료될 시간 대기
+    Thread.sleep(500);
+
+    Files.deleteIfExists(USERS_FILE.toPath());
+}
 
     @BeforeEach
     void connect() throws IOException {
@@ -48,12 +67,7 @@ class LoginServerTest {
 
     @AfterEach
     void close() throws IOException {
-        socket.close();
-    }
-
-    @AfterAll
-    void deleteUserFile() throws IOException {
-        Files.deleteIfExists(USERS_FILE.toPath());
+        if (socket != null && !socket.isClosed()) socket.close();
     }
 
     @Test
@@ -72,7 +86,7 @@ class LoginServerTest {
 
     @Test
     void testRegisterSuccess() throws IOException {
-        String randomId = "S" + (int)(Math.random() * 90000 + 10000);  // ex. S12345
+        String randomId = "S" + (int)(Math.random() * 90000 + 10000);
         out.println("REGISTER,테스트유저," + randomId + ",pw1234");
         String response = in.readLine();
         assertEquals("SUCCESS", response);
