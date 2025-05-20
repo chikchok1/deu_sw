@@ -6,7 +6,7 @@ package Controller;
 
 /**
  *
- * @author user
+ * @author minju
  */
 
 import Model.ReservedRoomModel;
