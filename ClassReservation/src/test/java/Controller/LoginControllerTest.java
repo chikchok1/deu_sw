@@ -39,6 +39,9 @@ class LoginControllerTest {
     void setup() {
         when(mockView.getUserId()).thenReturn("S20230001");
         when(mockView.getPassword()).thenReturn("1234");
+
+        // 서버 연결 실패를 가정: login 시도 시 예외 발생하도록 설정
+        doThrow(new RuntimeException("서버 연결 실패")).when(mockDao).login(any(), any());
     }
 
     /**

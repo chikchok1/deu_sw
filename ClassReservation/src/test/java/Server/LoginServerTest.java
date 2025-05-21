@@ -23,27 +23,30 @@ public class LoginServerTest {
 
     private Thread serverThread;
 
-    @BeforeAll
-    void startServerAndPrepareFile() throws Exception {
-        // 서버를 별도 스레드로 실행
+   @BeforeAll
+void startServerAndPrepareFile() throws Exception {
+    try (Socket testSocket = new Socket(HOST, PORT)) {
+        // 이미 서버가 실행 중이면 서버 실행 생략
+        System.out.println("서버가 이미 실행 중입니다.");
+    } catch (IOException e) {
+        // 서버가 실행 중이 아니므로 새로 시작
         serverThread = new Thread(() -> {
             try {
                 LoginServer.main(null);  // 서버 시작
-            } catch (Exception ignored) {
-            }
+            } catch (Exception ignored) {}
         });
         serverThread.start();
 
-        // 서버가 올라올 때까지 대기
-        Thread.sleep(1000);
-
-        // 테스트용 유저 등록
-        USERS_FILE.getParentFile().mkdirs();
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(USERS_FILE))) {
-            writer.write("홍길동,S20230001,abc123");
-            writer.newLine();
-        }
+        Thread.sleep(1000);  // 서버가 완전히 뜰 때까지 잠깐 대기
     }
+
+    // 테스트용 유저 파일 초기화
+    USERS_FILE.getParentFile().mkdirs();
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(USERS_FILE))) {
+        writer.write("홍길동,S20230001,abc123");
+        writer.newLine();
+    }
+}
 
     @AfterAll
     void stopServerAndCleanUp() throws IOException, InterruptedException {

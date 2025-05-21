@@ -11,8 +11,8 @@ public class UserDAO {
     private static final String RESERVE_CLASS_FILE = DATA_FOLDER + "/ReserveClass.txt";
     private static final String RESERVE_LAB_FILE = DATA_FOLDER + "/ReserveLab.txt";
     private static final String CHANGE_REQUEST = DATA_FOLDER + "/ChangeRequest.txt";
-        private static final String ROOM_STATUS = DATA_FOLDER + "/RoomStatus.txt";
-
+    private static final String ROOM_STATUS = DATA_FOLDER + "/RoomStatus.txt";
+    private static final String RESERVATION_REQUEST = DATA_FOLDER + "/ReservationRequest.txt";
 
     public UserDAO() {
         new File(DATA_FOLDER).mkdirs();
@@ -22,8 +22,8 @@ public class UserDAO {
         createFileIfNotExists(RESERVE_CLASS_FILE);
         createFileIfNotExists(RESERVE_LAB_FILE);
         createFileIfNotExists(CHANGE_REQUEST);
-                createFileIfNotExists(ROOM_STATUS);
-
+        createFileIfNotExists(ROOM_STATUS);
+        createFileIfNotExists(RESERVATION_REQUEST);
 
     }
 
@@ -142,60 +142,28 @@ public class UserDAO {
         }
         return null;
     }
-    public synchronized String getUserIdByName(String name) {
-    String[] files = {USER_FILE, PROF_FILE, ASSISTANT_FILE};
-
-    for (String fileName : files) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] tokens = line.split(",");
-                if (tokens.length >= 2 && tokens[0].trim().equals(name)) {
-                    return tokens[1].trim(); // 이름이 일치하면 해당 ID 반환
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("getUserIdByName 읽기 오류: " + e.getMessage());
-        }
-    }
-
-    return name; // 이름이 없으면 그대로 반환 (임시 fallback)
+public synchronized boolean login(String userId, String password) {
+    return validateUser(userId, password);
 }
-    public static String findIdByName(String name) {
-        File[] files = {
-            new File("data/users.txt"),
-            new File("data/professors.txt"),
-            new File("data/assistants.txt")
-        };
+    public synchronized String getUserIdByName(String name) {
+        String[] files = {USER_FILE, PROF_FILE, ASSISTANT_FILE};
 
-        for (File file : files) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        for (String fileName : files) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts.length >= 2 && parts[1].trim().equals(name.trim())) {
-                        return parts[0].trim(); // ID 반환
+                    String[] tokens = line.split(",");
+                    if (tokens.length >= 2 && tokens[0].trim().equals(name)) {
+                        return tokens[1].trim(); // 이름이 일치하면 해당 ID 반환
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("getUserIdByName 읽기 오류: " + e.getMessage());
             }
         }
 
-        return "알 수 없음"; // 없을 경우
+        return name; // 이름이 없으면 그대로 반환 (임시 fallback)
     }
+
 }
 
-
-
-/*학번 유효성 검사
-    public boolean isValidId(String userId) {
-        return userId.matches("[SPA][0-9]{3}"); // S123, P456, A789 등
-    }
-
-    // 비밀번호 유효성 검사
-    public boolean isValidPassword(String password) {
-        return password.length() >= 4 && password.length() <= 8;
-    }
-}
- */
