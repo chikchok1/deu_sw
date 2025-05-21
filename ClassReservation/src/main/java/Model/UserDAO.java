@@ -161,8 +161,32 @@ public class UserDAO {
 
     return name; // 이름이 없으면 그대로 반환 (임시 fallback)
 }
+    public static String findIdByName(String name) {
+        File[] files = {
+            new File("data/users.txt"),
+            new File("data/professors.txt"),
+            new File("data/assistants.txt")
+        };
 
+        for (File file : files) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 2 && parts[1].trim().equals(name.trim())) {
+                        return parts[0].trim(); // ID 반환
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return "알 수 없음"; // 없을 경우
+    }
 }
+
+
 
 /*학번 유효성 검사
     public boolean isValidId(String userId) {
