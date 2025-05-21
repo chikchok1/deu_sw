@@ -29,27 +29,23 @@ public class LoginServer {
 
                 new Thread(() -> {
                     String userId = null;
-                    boolean loginSuccess = false;
+
                     try {
                         userId = handleClient(socket, userDAO);
-                        if (userId != null) {
-                            loginSuccess = true;
-                            currentClients.incrementAndGet(); // 로그인 성공 시만 증가
-                        }
                     } finally {
-                        if (loginSuccess) {
-                            currentClients.decrementAndGet(); // 로그인 성공 후 종료 시 감소
-                        }
                         if (userId != null) {
-                            loggedInUsers.remove(userId);
-                            System.out.println(userId + " 로그아웃 처리됨");
+                            synchronized (LoginServer.class) {
+                                loggedInUsers.remove(userId);
+                                currentClients.decrementAndGet();
+                                System.out.println(userId + " 로그아웃 처리됨");
+                                System.out.println("현재 로그인 중인 사용자: " + loggedInUsers.keySet());
+                                System.out.println("현재 접속자 수: " + currentClients.get());
+                            }
                         }
-                        System.out.println("현재 로그인 중인 사용자: " + loggedInUsers.keySet());
-                        System.out.println("현재 접속자 수: " + currentClients.get());
+
                         try {
                             socket.close();
-                        } catch (IOException ignored) {
-                        }
+                        } catch (IOException ignored) {}
                     }
                 }).start();
             }
@@ -62,13 +58,13 @@ public class LoginServer {
         String loggedInUserId = null;
 
         try (
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())); PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true)
+        ) {
             String request = in.readLine();
             System.out.println("수신된 요청: " + request);
 
-            if (request == null) {
-                return null;
-            }
+            if (request == null) return null;
 
             if (request.equalsIgnoreCase("SHUTDOWN")) {
                 out.println("SERVER_SHUTTING_DOWN");
@@ -99,6 +95,7 @@ public class LoginServer {
                             loggedInUserId = userId;
                             loggedInUsers.put(userId, socket);
                             currentClients.incrementAndGet();
+
                             String name = userDAO.getUserNameById(userId);
                             out.println("SUCCESS," + name);
                             System.out.println(userId + " 로그인 성공");
@@ -135,33 +132,15 @@ public class LoginServer {
             while (true) {
                 String msg = in.readLine();
                 if (msg == null || msg.equalsIgnoreCase("EXIT")) {
-                            out.println("LOGOUT_SUCCESS"); // 로그아웃 성공 응답 전송
-
+                    out.println("LOGOUT_SUCCESS");
                     break;
                 }
 
-                // 필요 시 다른 명령 처리 가능
                 System.out.println("[" + loggedInUserId + "] 메시지 수신: " + msg);
             }
 
         } catch (IOException e) {
             System.out.println("클라이언트 처리 오류: " + e.getMessage());
-        } finally {
-            // 정상 종료 또는 예외 시 로그아웃 처리
-            if (loggedInUserId != null) {
-                synchronized (LoginServer.class) {
-                    loggedInUsers.remove(loggedInUserId);
-                    currentClients.decrementAndGet();
-                    System.out.println(loggedInUserId + " 로그아웃 처리됨");
-                    System.out.println("현재 로그인 중인 사용자: " + loggedInUsers.keySet());
-                    System.out.println("현재 접속자 수: " + currentClients.get());
-                }
-            }
-
-            try {
-                socket.close();
-            } catch (IOException ignored) {
-            }
         }
 
         return loggedInUserId;
@@ -186,15 +165,11 @@ public class LoginServer {
         if (userId == null || userId.isEmpty()) {
             return "알 수 없음";
         }
-        switch (userId.charAt(0)) {
-            case 'S':
-                return "학생";
-            case 'P':
-                return "교수";
-            case 'A':
-                return "조교";
-            default:
-                return "알 수 없음";
-        }
+        return switch (userId.charAt(0)) {
+            case 'S' -> "학생";
+            case 'P' -> "교수";
+            case 'A' -> "조교";
+            default -> "알 수 없음";
+        };
     }
 }
