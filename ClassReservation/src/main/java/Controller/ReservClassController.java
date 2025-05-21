@@ -181,16 +181,24 @@ public class ReservClassController {
 
     private void loadReservationData() {
         reservedMap.clear();
-        String filePath = "data/ReserveClass.txt";
+        loadFromFile("data/ReserveClass.txt");
+        loadFromFile("data/ReservationRequest.txt");
+    }
+
+    private void loadFromFile(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length >= 7 && parts[6].trim().equals("예약됨")) {
-                    String room = parts[1].trim();
-                    String day = parts[2].trim().replace("요일", "");
-                    String time = parts[3].trim().substring(0, 3);
-                    reservedMap.computeIfAbsent(room, k -> new HashSet<>()).add(day + "_" + time);
+                if (parts.length >= 7) {
+                    String status = parts[6].trim();
+                    if (status.equals("예약됨") || status.equals("대기")) {
+                        String room = parts[1].trim();
+                        String day = parts[2].trim().replace("요일", "");
+                        String time = parts[3].trim().substring(0, 3);
+                        reservedMap.computeIfAbsent(room, k -> new HashSet<>())
+                                .add(day + "_" + time);
+                    }
                 }
             }
         } catch (IOException e) {

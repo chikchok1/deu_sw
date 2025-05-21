@@ -13,12 +13,36 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 
+import Model.UserDAO;
+import View.ClientAdmin;
+import Controller.RoomAdminController;
+import javax.swing.JOptionPane;
+import java.io.FileReader;
+import java.io.IOException;
+
+
 public class ExecutiveController {
 
     private Executive executive;
+    private static boolean hasShownAlert = false;
+
 
     public ExecutiveController(Executive executive) {
         this.executive = executive;
+
+        // 예약 요청 알림 확인
+        if (!hasShownAlert) {
+            int count = countPendingRequests("data/ReservationRequest.txt");
+            if (count > 0) {
+                JOptionPane.showMessageDialog(
+                    executive,
+                    "📌 현재 대기 중인 예약 요청이 총 " + count + "건 있습니다.",
+                    "예약 요청 알림",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+            hasShownAlert = true;
+        }
 
         // [1] "예약 확인" 버튼
         this.executive.getViewReservedButton().addActionListener(new ActionListener() {
@@ -117,5 +141,19 @@ public class ExecutiveController {
         View.ClassroomReservationApproval approvalView = new View.ClassroomReservationApproval();
         new Controller.ClassroomReservationApprovalController(approvalView);
         approvalView.setVisible(true);
+    }
+    private int countPendingRequests(String filePath) {
+        int count = 0;
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                    count++;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return count;
     }
 }
