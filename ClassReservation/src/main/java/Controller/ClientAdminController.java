@@ -1,171 +1,152 @@
 package Controller;
 
 import View.ClientAdmin;
+import View.Executive;
+import Model.Session;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ClientAdminController {
-    private ClientAdmin view;
-    private final String profFile = "data/prof.txt";
-    private final String userFile = "data/users.txt";
+
+    private final ClientAdmin view;
 
     public ClientAdminController(ClientAdmin view) {
         this.view = view;
-        
-        loadFileToTable(profFile);
-        loadFileToTable(userFile);
-        
-view.getJButton2().addActionListener(e -> deleteSelectedRow()); // 삭제
-    view.getJButton1().addActionListener(e -> updateSelectedRow());  // 수정
-    view.getJButton3().addActionListener(e -> goBackToExecutive()); // 이전
 
+        loadUsersFromServer(); // 서버에서 사용자 목록 로드
+
+        view.getJButton2().addActionListener(e -> deleteSelectedUser());
+        view.getJButton1().addActionListener(e -> updateSelectedUser());
+        view.getJButton3().addActionListener(e -> goBackToExecutive());
     }
 
-    
-    
-private void loadFileToTable(String filePath) {
-    DefaultTableModel model = (DefaultTableModel) view.getTable().getModel();
-    File file = new File(filePath);
-    
-    if (!file.exists()) {
-        return; // 파일이 없으면 무시
-    }
+    private void loadUsersFromServer() {
+        DefaultTableModel model = (DefaultTableModel) view.getTable().getModel();
+        model.setRowCount(0);  // 기존 데이터 초기화
 
-    List<String[]> professorRows = new ArrayList<>();
-    List<String[]> userRows = new ArrayList<>();
+        PrintWriter out = Session.getOut();
+        BufferedReader in = Session.getIn();
 
-    try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            String[] tokens = line.split(",");
-            if (tokens.length == 3) {
-                if (tokens[1].startsWith("P")) {
-                    professorRows.add(tokens);
-                } else {
-                    userRows.add(tokens);
-                }
-            }
-        }
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-
-    // 교수 데이터를 먼저 추가
-    for (String[] row : professorRows) {
-        model.addRow(row);
-    }
-
-    // 사용자 데이터를 다음에 추가
-    for (String[] row : userRows) {
-        model.addRow(row);
-    }
-}
-
-    private void deleteSelectedRow() {
-        JTable table = view.getTable();
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        int selectedRow = table.getSelectedRow();
-
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(null, "삭제할 행을 선택하세요.");
+        if (out == null || in == null) {
+            JOptionPane.showMessageDialog(view, "서버와 연결되어 있지 않습니다.");
             return;
         }
 
-        String name = (String) model.getValueAt(selectedRow, 0);
-        String id = (String) model.getValueAt(selectedRow, 1);
-        String pw = (String) model.getValueAt(selectedRow, 2);
+        try {
+            out.println("GET_ALL_USERS");
+            out.flush();
 
-        model.removeRow(selectedRow); // 테이블에서 제거
-
-        String filePath = id.startsWith("P") ? profFile : userFile;
-
-        List<String> lines = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
-            while ((line = br.readLine()) != null) {
-                if (!line.equals(name + "," + id + "," + pw)) {
-                    lines.add(line);
+            while ((line = in.readLine()) != null && !line.equals("END_OF_USERS")) {
+                String[] tokens = line.split(",");
+                if (tokens.length == 3) {
+                    model.addRow(tokens);
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(view, "서버에서 사용자 목록을 불러오는 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    private void deleteSelectedUser() {
+        JTable table = view.getTable();
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        int row = table.getSelectedRow();
+
+        if (row == -1) {
+            JOptionPane.showMessageDialog(view, "삭제할 사용자를 선택하세요.");
+            return;
         }
 
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-            for (String line : lines) {
-                bw.write(line);
-                bw.newLine();
+        String userId = (String) model.getValueAt(row, 1);
+
+        PrintWriter out = Session.getOut();
+        BufferedReader in = Session.getIn();
+        if (out == null || in == null) {
+            JOptionPane.showMessageDialog(view, "서버와 연결되어 있지 않습니다.");
+            return;
+        }
+
+        try {
+            out.println("DELETE_USER," + userId);
+            out.flush();
+
+            String response = in.readLine();
+            if (response == null) {
+                JOptionPane.showMessageDialog(view, "서버 응답 없음");
+                return;
             }
+
+            if ("DELETE_SUCCESS".equals(response)) {
+                JOptionPane.showMessageDialog(view, "삭제 성공");
+                loadUsersFromServer();  // 전체 다시 로딩
+            } else {
+                JOptionPane.showMessageDialog(view, "삭제 실패: " + response);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(view, "삭제 중 오류 발생: " + e.getMessage());
         }
     }
-    private void updateSelectedRow() {
-    JTable table = view.getTable();
-    DefaultTableModel model = (DefaultTableModel) table.getModel();
-    int selectedRow = table.getSelectedRow();
 
-    if (selectedRow == -1) {
-        JOptionPane.showMessageDialog(null, "수정할 행을 선택하세요.");
-        return;
-    }
+    private void updateSelectedUser() {
+        JTable table = view.getTable();
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        int row = table.getSelectedRow();
 
-    String oldName = (String) model.getValueAt(selectedRow, 0);
-    String id = (String) model.getValueAt(selectedRow, 1);
-    String oldPw = (String) model.getValueAt(selectedRow, 2);
+        if (row == -1) {
+            JOptionPane.showMessageDialog(view, "수정할 사용자를 선택하세요.");
+            return;
+        }
 
-    // 새 이름, 새 비번 입력 받기
-    String newName = JOptionPane.showInputDialog(null, "새 이름을 입력하세요:", oldName);
-    if (newName == null || newName.trim().isEmpty()) return;
+        String userId = (String) model.getValueAt(row, 1);
+        String oldName = (String) model.getValueAt(row, 0);
+        String oldPw = (String) model.getValueAt(row, 2);
 
-    String newPw = JOptionPane.showInputDialog(null, "새 비밀번호를 입력하세요:", oldPw);
-    if (newPw == null || newPw.trim().isEmpty()) return;
+        String newName = JOptionPane.showInputDialog(view, "새 이름:", oldName);
+        if (newName == null || newName.trim().isEmpty()) {
+            return;
+        }
 
-    // 파일 결정
-    String filePath = id.startsWith("P") ? profFile : userFile;
+        String newPw = JOptionPane.showInputDialog(view, "새 비밀번호:", oldPw);
+        if (newPw == null || newPw.trim().isEmpty()) {
+            return;
+        }
 
-    List<String> lines = new ArrayList<>();
-    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            if (line.equals(oldName + "," + id + "," + oldPw)) {
-                lines.add(newName + "," + id + "," + newPw); // 수정된 내용
+        PrintWriter out = Session.getOut();
+        BufferedReader in = Session.getIn();
+        if (out == null || in == null) {
+            JOptionPane.showMessageDialog(view, "서버와 연결되어 있지 않습니다.");
+            return;
+        }
+
+        try {
+            out.println("UPDATE_USER," + userId + "," + newName + "," + newPw);
+            out.flush();
+
+            String response = in.readLine();
+            if ("UPDATE_SUCCESS".equals(response)) {
+                model.setValueAt(newName, row, 0);
+                model.setValueAt(newPw, row, 2);
+                JOptionPane.showMessageDialog(view, "수정 성공");
             } else {
-                lines.add(line);
+                JOptionPane.showMessageDialog(view, "수정 실패: " + response);
             }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(view, "수정 요청 중 오류 발생: " + e.getMessage());
         }
-    } catch (IOException e) {
-        e.printStackTrace();
-        return;
     }
-
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-        for (String line : lines) {
-            bw.write(line);
-            bw.newLine();
-        }
-    } catch (IOException e) {
-        e.printStackTrace();
-        return;
-    }
-
-    // 테이블 갱신
-    model.setValueAt(newName, selectedRow, 0);
-    model.setValueAt(newPw, selectedRow, 2);
-
-    JOptionPane.showMessageDialog(null, "수정이 완료되었습니다.");
-}
 
     private void goBackToExecutive() {
-    view.dispose(); // 현재 창 닫기
-    View.Executive executiveView = new View.Executive(); // Executive 뷰 생성
-    new Controller.ExecutiveController(executiveView);   // Executive 컨트롤러 연결
-    executiveView.setVisible(true); // 창 띄우기
-}
-
-
+        view.dispose();
+        Executive executive = view.getExecutive();
+        if (executive != null) {
+            executive.setVisible(true);
+        } else {
+            System.err.println("Executive 인스턴스가 null입니다.");
+        }
+    }
 }

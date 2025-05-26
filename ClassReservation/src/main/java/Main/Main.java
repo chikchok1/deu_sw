@@ -5,7 +5,6 @@
 package Main;
 
 import Controller.LoginController;
-import Model.UserDAO;
 import View.LoginForm;
 
 /**
@@ -27,10 +26,10 @@ public class Main {
     }
         // 로그인 화면부터 실행
         LoginForm loginForm = new LoginForm();
-        UserDAO userDAO = new UserDAO();
+        //UserDAO userDAO = new UserDAO();
 
         //LoginController 생성하면서 loginForm에 회원가입 로직도 붙일 예정
-        new LoginController(loginForm, userDAO);
+        new LoginController(loginForm);
 
         loginForm.setVisible(true);
     }

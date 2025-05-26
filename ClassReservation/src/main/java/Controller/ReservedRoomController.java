@@ -1,17 +1,24 @@
 package Controller;
 
-import Model.ReservedRoomModel;
+import common.model.ReservedRoomModel;
 import Model.Session;
-import Model.User;
-import Model.UserDAO;
 import View.ReservedRoomView;
 import View.RoomSelect;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 
 public class ReservedRoomController {
 
     private ReservedRoomView view;
     private ReservedRoomModel model;
+    
+    private Socket socket;
+    private BufferedReader in;
+    private PrintWriter out;
 
     public ReservedRoomController(ReservedRoomView view) {
         this.view = view;
@@ -56,72 +63,78 @@ public class ReservedRoomController {
             view.setUpdating(false);
         });
 
-        // [4] 이전 버튼 클릭 시
 // [4] 이전 버튼 클릭 시
 view.getBeforeButton().addActionListener(e -> {
-    view.dispose();
+    view.dispose();  // 현재 창 닫기
     String userId = Session.getLoggedInUserId();
 
     if (userId != null && userId.startsWith("A")) {
-        // 조교일 경우 Executive로 이동
-        View.Executive executive = new View.Executive();
-        new Controller.ExecutiveController(executive);
-        executive.setVisible(true);
+        // 조교일 경우 기존 Executive 인스턴스 재사용
+        if (view.getExecutive() != null) {
+            view.getExecutive().setVisible(true);
+        } else {
+            System.err.println("[오류] Executive 인스턴스가 null입니다.");
+        }
     } else {
-        // 일반 사용자일 경우 RoomSelect로 이동
-        RoomSelect roomSelect = new RoomSelect();
+        // 학생 또는 교수는 RoomSelect로 이동
+        RoomSelect roomSelect = RoomSelect.getInstance();  // 싱글톤 인스턴스
         new RoomSelectController(roomSelect);
         roomSelect.setVisible(true);
     }
 });
-    }
 
+    }
+    
     /*
+
     private void loadReservedRooms(String selectedRoom) {
-        JTable table = view.getTable();
-        // 테이블 초기화
-        for (int row = 0; row < table.getRowCount(); row++) {
-            for (int col = 1; col < table.getColumnCount(); col++) {
-                table.setValueAt("", row, col);
-            }
+    JTable table = view.getTable();
+
+    // 테이블 초기화
+    for (int row = 0; row < table.getRowCount(); row++) {
+        for (int col = 1; col < table.getColumnCount(); col++) {
+            table.setValueAt("", row, col);
         }
-
-        char userType = Session.getLoggedInUserId().charAt(0);
-        String userName = Session.getLoggedInUserName();
-
-        // 두 파일 모두 읽어옴
-        loadFileToTable("data/ReserveClass.txt", selectedRoom, userType, userName);
-        loadFileToTable("data/ReserveLab.txt", selectedRoom, userType, userName);
     }
-     */
-    private void loadReservedRooms(String selectedRoom) {
-        JTable table = view.getTable();
 
-        // 테이블 초기화
-        for (int row = 0; row < table.getRowCount(); row++) {
-            for (int col = 1; col < table.getColumnCount(); col++) {
-                table.setValueAt("", row, col);
-            }
-        }
+    String userId = Session.getLoggedInUserId();
+    boolean isPrivileged = userId.startsWith("P") || userId.startsWith("A");
 
-        // 현재 로그인한 사용자 정보 가져오기
-        String userId = Session.getLoggedInUserId();
-        String userName = Session.getLoggedInUserName();
-        User currentUser = new User(userId, "", userName); // 비밀번호는 사용하지 않음
+    PrintWriter out = Session.getOut();
+    BufferedReader in = Session.getIn();
 
-        // 사용자 권한 판단
-        UserDAO userDAO = new UserDAO();
-        boolean isPrivileged = userDAO.authorizeAccess(userId); // P, A만 true
+    if (out == null || in == null) {
+        JOptionPane.showMessageDialog(view, "서버와 연결되어 있지 않습니다.");
+        return;
+    }
 
-        // 예약 목록 가져오기
-        var reservations = model.viewUserReservations(currentUser, selectedRoom);
+    // 서버에 요청 전송
+    String request = String.format("VIEW_RESERVATION,%s,%s", userId, selectedRoom);
+    out.println(request);
+    out.flush();
 
-        for (var r : reservations) {
-            int col = getDayColumn(r.day);
-            int row = getPeriodRow(r.period);
+    try {
+        String line;
+        while ((line = in.readLine()) != null) {
+            if (line.equals("END_OF_RESERVATION")) break; // 서버에서 예약 끝 표시
+
+            String[] tokens = line.split(",");
+            if (tokens.length < 7) continue;
+
+            String name = tokens[0].trim();         // 예약자 이름
+            String room = tokens[1].trim();         // 강의실
+            String day = tokens[2].trim();          // 요일
+            String period = tokens[3].trim();       // 교시
+            String status = tokens[6].trim();       // 상태 (예: 예약됨)
+
+            
+            if (!room.equals(selectedRoom)) continue; // 선택한 강의실만 표시
+
+            int col = getDayColumn(day);
+            int row = getPeriodRow(period);
 
             if (col != -1 && row != -1) {
-                String display = isPrivileged ? r.name : "예약됨";
+                String display = isPrivileged ? name : "예약됨";
                 String current = (String) table.getValueAt(row, col);
                 if (current == null || current.isEmpty()) {
                     table.setValueAt(display, row, col);
@@ -130,29 +143,84 @@ view.getBeforeButton().addActionListener(e -> {
                 }
             }
         }
+
+    } catch (IOException e) {
+        JOptionPane.showMessageDialog(view, "서버 응답 처리 중 오류: " + e.getMessage());
+    }
+}
+*/
+    
+    private void loadReservedRooms(String selectedRoom) {
+    JTable table = view.getTable();
+
+    // 테이블 초기화
+    for (int row = 0; row < table.getRowCount(); row++) {
+        for (int col = 1; col < table.getColumnCount(); col++) {
+            table.setValueAt("", row, col);
+        }
     }
 
-    private void loadFileToTable(String filePath, String selectedRoom, char userType, String userName) {
-        JTable table = view.getTable();
-        UserDAO userDAO = new UserDAO(); // ⬅ SO302 호출용
+    String userId = Session.getLoggedInUserId();
+    boolean isPrivileged = userId.startsWith("P") || userId.startsWith("A");
 
-        for (var r : model.getReservations(filePath, selectedRoom, userType, userName)) {
-            int col = getDayColumn(r.day);
-            int row = getPeriodRow(r.period);
+    PrintWriter out = Session.getOut();
+    BufferedReader in = Session.getIn();
+
+    if (out == null || in == null) {
+        JOptionPane.showMessageDialog(view, "서버와 연결되어 있지 않습니다.");
+        return;
+    }
+
+    // 서버에 요청 전송
+    String request = String.format("VIEW_RESERVATION,%s,%s", userId, selectedRoom);
+    out.println(request);
+    out.flush();
+
+    try {
+        String line;
+        while ((line = in.readLine()) != null) {
+            if (line.equals("END_OF_RESERVATION")) break;
+
+            String[] tokens = line.split(",");
+            if (tokens.length < 7) continue;
+
+            String name = tokens[0].trim();     // 예약자 이름
+            String room = tokens[1].trim();     // 강의실/실습실
+            String day = tokens[2].trim();      // 요일
+            String period = tokens[3].trim();   // 교시
+            String status = tokens[6].trim();   // 상태
+
+            if (!room.equals(selectedRoom)) continue;
+
+            int col = getDayColumn(day);
+            int row = getPeriodRow(period);
 
             if (col != -1 && row != -1) {
-                // 👉 SO302: 권한에 따라 이름 대신 "예약됨" 표시
-                String display = userDAO.authorizeAccess(Session.getLoggedInUserId()) ? r.name : "예약됨";
-
                 String current = (String) table.getValueAt(row, col);
-                if (current == null || current.isEmpty()) {
-                    table.setValueAt(display, row, col);
-                } else if (!current.contains(display)) {
-                    table.setValueAt(current + ", " + display, row, col);
+
+                if (isPrivileged) {
+                    // 교수/조교는 예약자 이름 표시
+                    if (current == null || current.isEmpty()) {
+                        table.setValueAt(name, row, col);
+                    } else if (!current.contains(name)) {
+                        table.setValueAt(current + ", " + name, row, col);
+                    }
+                } else {
+                    // 학생은 본인 예약만 "예약됨"으로 표시
+                    if (name.equals(Session.getLoggedInUserName())) {
+                        if (current == null || current.isEmpty()) {
+                            table.setValueAt("예약됨", row, col);
+                        } else if (!current.contains("예약됨")) {
+                            table.setValueAt(current + ", 예약됨", row, col);
+                        }
+                    }
                 }
             }
         }
+    } catch (IOException e) {
+        JOptionPane.showMessageDialog(view, "서버 응답 처리 중 오류: " + e.getMessage());
     }
+}
 
     private int getDayColumn(String day) {
         return switch (day) {

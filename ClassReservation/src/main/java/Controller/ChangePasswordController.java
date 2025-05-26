@@ -1,34 +1,20 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Controller;
 
-/**
- *
- * @author YangJinWon
- */
 import Model.Session;
-import Model.UserDAO;
 import View.ChangePasswordView;
+import View.Executive;
 import View.RoomSelect;
 
 import javax.swing.*;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.awt.GraphicsEnvironment;
+import java.io.*;
 
 public class ChangePasswordController {
 
     private final ChangePasswordView view;
-    private final UserDAO userDAO;
 
     public ChangePasswordController(ChangePasswordView view) {
         this.view = view;
-        this.userDAO = new UserDAO();
-
-        // View에서 버튼 클릭 이벤트를 등록
         view.setSaveButtonListener(e -> changePassword());
     }
 
@@ -42,78 +28,63 @@ public class ChangePasswordController {
             return;
         }
 
-        String filePath = getFileNameByUserId(userId);
-        if (filePath == null) {
-            JOptionPane.showMessageDialog(view, "유효하지 않은 사용자입니다.");
+        PrintWriter out = Session.getOut();
+        BufferedReader in = Session.getIn();
+
+        if (out == null || in == null) {
+            JOptionPane.showMessageDialog(view, "서버와 연결되어 있지 않습니다.");
             return;
         }
 
+        String request = String.join(",", "CHANGE_PASSWORD", userId, currentPassword, newPassword);
+        out.println(request);
+        out.flush();
+
         try {
-            File file = new File(filePath);
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            List<String> lines = new ArrayList<>();
-            boolean updated = false;
+            String response = in.readLine();
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 3 && parts[1].equals(userId)) {
-                    if (!parts[2].equals(currentPassword)) {
-                        JOptionPane.showMessageDialog(view, "현재 비밀번호가 일치하지 않습니다.");
-                        reader.close();
-                        return;
+            switch (response) {
+                case "PASSWORD_CHANGED":
+                    JOptionPane.showMessageDialog(view, "비밀번호가 성공적으로 변경되었습니다.");
+
+                    if (!GraphicsEnvironment.isHeadless()) {
+                        char userType = userId.charAt(0); // ✅ ID 첫 글자 기준 분기
+
+                        switch (userType) {
+                            case 'S': // 학생
+                            case 'P': // 교수
+                                RoomSelect roomSelect = new RoomSelect();
+                                new RoomSelectController(roomSelect);
+                                roomSelect.setVisible(true);
+                                break;
+
+                            case 'A': // 조교
+                                Executive executive = new Executive();
+                                new ExecutiveController(executive);
+                                executive.setVisible(true);
+                                break;
+
+                            default:
+                                JOptionPane.showMessageDialog(view, "알 수 없는 사용자 유형입니다: " + userType);
+                        }
+
+                        view.dispose();
                     }
-                    line = parts[0] + "," + parts[1] + "," + newPassword;
-                    updated = true;
-                }
-                lines.add(line);
+                    break;
+
+                case "INVALID_CURRENT_PASSWORD":
+                    JOptionPane.showMessageDialog(view, "현재 비밀번호가 일치하지 않습니다.");
+                    break;
+
+                case "USER_NOT_FOUND":
+                    JOptionPane.showMessageDialog(view, "사용자 정보를 찾을 수 없습니다.");
+                    break;
+
+                default:
+                    JOptionPane.showMessageDialog(view, "비밀번호 변경 실패: " + response);
             }
-            reader.close();
-
-            if (!updated) {
-                JOptionPane.showMessageDialog(view, "사용자 정보를 찾을 수 없습니다.");
-                return;
-            }
-
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            for (String l : lines) {
-                writer.write(l);
-                writer.newLine();
-            }
-            writer.close();
-
-            JOptionPane.showMessageDialog(view, "비밀번호가 성공적으로 변경되었습니다.");
-
-            // [minju] GitHub Actions에서 창 띄우면 에러 발생해서, 화면 있을 때만 실행되게 분기 추가
-            if (!GraphicsEnvironment.isHeadless()) {
-                // 비밀번호 변경 완료 후 강의실 선택 화면으로 이동
-                RoomSelect roomSelect = new RoomSelect();
-                new RoomSelectController(roomSelect);
-                roomSelect.setVisible(true);
-            
-                // 현재 비밀번호 변경 창 닫기
-                view.dispose();
-            }
-
         } catch (IOException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(view, "오류 발생: " + e.getMessage());
-        }
-    }
-
-    protected String getFileNameByUserId(String userId) {
-        if (userId == null || userId.length() == 0) return null;
-
-        switch (userId.charAt(0)) {
-            case 'S':
-                return "data/users.txt";
-            case 'P':
-                return "data/prof.txt";
-            case 'A':
-                return "data/assistant.txt";
-            default:
-                return null;
+            JOptionPane.showMessageDialog(view, "서버 응답 오류: " + e.getMessage());
         }
     }
 }
-

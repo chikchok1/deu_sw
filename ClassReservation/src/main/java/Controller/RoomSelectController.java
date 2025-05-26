@@ -1,7 +1,6 @@
 package Controller;
 
 import Model.Session;
-import Model.UserDAO;
 import View.ChangePasswordView;
 import View.RoomSelect;
 import View.ReservClassView;
@@ -28,17 +27,21 @@ public class RoomSelectController {
         this.view.setLabButtonActionListener(e -> openReservLab());
         this.view.setViewReservedActionListener(e -> openReservedClassRoom());
         this.view.setLogOutButtonActionListener(e -> handleLogout());
+       
+        System.out.println(">> setChangePasswordActionListener() 호출 전");
         this.view.setChangePasswordActionListener(e -> openChangePasswordView());
+        System.out.println(">> setChangePasswordActionListener() 호출 완료");
+
         this.view.setReservationChangeActionListener(e -> openReservationChange());
-
     }
 
-    private void openChangePasswordView() {
-        ChangePasswordView changePasswordView = new ChangePasswordView();
-        new ChangePasswordController(changePasswordView);
-        changePasswordView.setVisible(true);
-        view.dispose();
-    }
+   private void openChangePasswordView() {
+    ChangePasswordView changePasswordView = new ChangePasswordView(view);  // RoomSelect 전달
+    new ChangePasswordController(changePasswordView);
+    changePasswordView.setVisible(true);
+    view.setVisible(false);  // 재사용을 위해 숨김 처리
+}
+
 
     private void openReservClass() {
         ReservClassView reservClassView = new ReservClassView();
@@ -55,11 +58,11 @@ public class RoomSelectController {
     }
 
     private void openReservedClassRoom() {
-        ReservedRoomView reservedRoomView = new ReservedRoomView();          // View 생성
-        new ReservedRoomController(reservedRoomView);                // Controller 연결
-        reservedRoomView.setVisible(true);                           // 화면에 보여줌
-        view.dispose();
-    }
+    ReservedRoomView reservedRoomView = new ReservedRoomView(this.view); // RoomSelect 전달
+    new ReservedRoomController(reservedRoomView);
+    reservedRoomView.setVisible(true);
+    view.setVisible(false); // dispose()가 아닌 setVisible(false)로 창 재사용
+}
 
     private void openReservationChange() {
         Reservationchangeview changeView = new Reservationchangeview();
@@ -109,8 +112,7 @@ public class RoomSelectController {
         view.dispose();
 
         LoginForm loginForm = new LoginForm();
-        UserDAO dao = new UserDAO();
-        new LoginController(loginForm, dao);
+        new LoginController(loginForm);
         loginForm.setVisible(true);
     }
 }

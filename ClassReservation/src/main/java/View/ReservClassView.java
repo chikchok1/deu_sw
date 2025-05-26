@@ -21,8 +21,8 @@ public class ReservClassView extends javax.swing.JFrame {
         initComponents();
         Controller.ReservClassController controller = new Controller.ReservClassController(this);
         String initialRoom = getSelectedClassRoom();
-        JTable initialTable = controller.buildCalendarTable(initialRoom);
-        updateCalendarTable(initialTable); // 테이블을 업데이트
+       // JTable initialTable = controller.buildCalendarTable(initialRoom);
+        //updateCalendarTable(initialTable); // 테이블을 업데이트
     }
 
     // 버튼 리스너 등록

@@ -1,7 +1,6 @@
 package Controller;
 
-import Model.MembershipModel;
-import Model.UserDAO;
+import common.model.MembershipModel;
 import Model.Session; // 추가: Session 가져오기
 import View.*;
 import java.io.BufferedReader;
@@ -9,17 +8,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import utils.ConfigLoader;
+import common.utils.ConfigLoader;
 
 public class LoginController {
 
     private LoginForm view;
-    private UserDAO dao;
+   // private UserDAO dao;
     private MembershipView membershipView;
 
-    public LoginController(LoginForm view, UserDAO dao) {
+    public LoginController(LoginForm view) {
         this.view = view;
-        this.dao = dao;
+        //this.dao = dao;
 
         this.view.addLoginListener(e -> handleLogin());
         this.view.addJoinListener(e -> openMembership());
@@ -78,6 +77,11 @@ public void handleLogin() {
                 Session.setSocket(socket);
                 Session.setIn(in);
                 Session.setOut(out);
+                
+                 // ✅ INIT 메시지 전송 (서버 스레드 블로킹 방지용)
+    out.println("INIT");
+    out.flush();
+    
 
                 // 🟩 사용자 역할 설정 (S: 학생, P: 교수, A: 조교)
                 String role = switch (id.charAt(0)) {

@@ -89,10 +89,16 @@ public class RoomSelect extends javax.swing.JFrame {
     }
 
     public void setChangePasswordActionListener(java.awt.event.ActionListener listener) {
+        System.out.println("ChangePassword 버튼 상태: " + (ChangePassword == null ? "null" : "정상"));
+
+            System.out.println("비밀번호 변경 리스너 등록 시도");  // 로그 추가
+
         for (java.awt.event.ActionListener al : ChangePassword.getActionListeners()) {
             ChangePassword.removeActionListener(al);
         }
         ChangePassword.addActionListener(listener);
+            System.out.println("등록된 리스너 수: " + ChangePassword.getActionListeners().length);
+
     }
 
     /**

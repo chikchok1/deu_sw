@@ -10,7 +10,7 @@ package Controller;
  */
 import View.MembershipView;
 import View.LoginForm;
-import Model.MembershipModel;
+import common.model.MembershipModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

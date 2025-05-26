@@ -4,29 +4,47 @@
  */
 package View;
 
+import javax.swing.JButton;
+import javax.swing.JTable;
+
 /**
  *
  * @author YangJinWon
  */
 public class ClassroomReservationApproval extends javax.swing.JFrame {
 
-    /**
-     * Creates new form ClassroomReservationApproval
-     */
-    public ClassroomReservationApproval() {
+    private Executive executive;
+
+    // Executive을 전달받는 생성자
+    public ClassroomReservationApproval(Executive executive) {
         initComponents();
+        this.executive = executive;
+
+        // "이전" 버튼 처리
+        getBackButton().addActionListener(e -> {
+            this.dispose();
+            executive.setVisible(true); // 기존 Executive 창 재사용
+        });
     }
 
-    public javax.swing.JTable getTable() {
+    public JTable getTable() {
         return jTable2;
     }
 
-    public javax.swing.JButton getApproveButton() {
+    public JButton getApproveButton() {
         return jButton1;
     }
 
-    public javax.swing.JButton getRejectButton() {
+    public JButton getRejectButton() {
         return jButton2;
+    }
+
+    public JButton getBackButton() {
+        return jButton3;  // 이전 버튼
+    }
+
+    public void setReservationId(String id) {
+        jTextField1.setText(id);
     }
 
     /**
@@ -67,7 +85,6 @@ public class ClassroomReservationApproval extends javax.swing.JFrame {
 
         jLabel2.setText("예약ID:");
 
-        jTextField1.setText("jTextField1");
         jTextField1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField1ActionPerformed(evt);
@@ -143,11 +160,12 @@ public class ClassroomReservationApproval extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
+        /*TODO add your handling code here:
         this.dispose(); // 현재 창 닫기
         View.Executive exec = new View.Executive(); // Executive 새로 열기
          new Controller.ExecutiveController(exec);   // 반드시 컨트롤러도 연결해야 버튼들 작동함
         exec.setVisible(true);                      // 화면 띄우기
+        */
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
@@ -192,14 +210,11 @@ public class ClassroomReservationApproval extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ClassroomReservationApproval().setVisible(true);
+                //new ClassroomReservationApproval().setVisible(true);
             }
         });
     }
     
-        public void setReservationId(String id) {
-        jTextField1.setText(id);
-        }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

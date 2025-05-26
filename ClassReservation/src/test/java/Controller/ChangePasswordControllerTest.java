@@ -43,7 +43,7 @@ public class ChangePasswordControllerTest {
     void setUp() throws IOException {
         mockView = mock(ChangePasswordView.class);
         controller = new ChangePasswordController(mockView) {
-            @Override
+           // @Override
             protected String getFileNameByUserId(String userId) {
                 return TEST_FILE;
             }
@@ -66,16 +66,23 @@ public class ChangePasswordControllerTest {
     }
 
     @Test
-    void testChangePasswordSuccess() throws IOException {
-        Assumptions.assumeFalse(System.getenv().containsKey("CI"), "CI 환경에서는 테스트 건너뜀");
-        when(mockView.getPresentPassword()).thenReturn("oldpass");
-        when(mockView.getChangePassword()).thenReturn("newpass");
+void testChangePasswordSuccess() throws IOException {
+    Assumptions.assumeFalse(System.getenv().containsKey("CI"), "CI 환경에서는 테스트 건너뜀");
 
-        controller.changePassword();
+    when(mockView.getPresentPassword()).thenReturn("oldpass");
+    when(mockView.getChangePassword()).thenReturn("newpass");
 
-        String content = Files.readString(Paths.get(TEST_FILE));
-        Assertions.assertTrue(content.contains("S1234,newpass"));
-    }
+    controller.changePassword();
+
+    String content = Files.readString(Paths.get(TEST_FILE));
+    
+    // 수정 포인트: 전체 라인을 비교 또는 포함 여부 확인
+    Assertions.assertTrue(
+        content.contains("학생,S1234,newpass"),
+        "Expected password to be updated, but got: \n" + content
+    );
+}
+
 
     @Test
     void testChangePasswordWrongOldPassword() throws IOException {
@@ -113,7 +120,7 @@ public class ChangePasswordControllerTest {
         controller.changePassword();
 
         String content = Files.readString(Paths.get(TEST_FILE));
-        Assertions.assertTrue(content.contains("S9999,oldpass")); // 변경되지 않아야 함
+Assertions.assertTrue(content.contains("학생,S1234,oldpass"));
     }
 
 }

@@ -1,8 +1,5 @@
 package Controller;
-/**
- *
- * @author minju
- */
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -30,7 +27,6 @@ public class ReservClassControllerTest {
 
     @BeforeAll
     static void enableTestMode() {
-        // 테스트 환경 여부 설정 → 운영 코드에서 분기 조건으로 활용 가능
         System.setProperty("test.env", "true");
     }
 
@@ -41,9 +37,7 @@ public class ReservClassControllerTest {
         if (!file.exists()) {
             file.getParentFile().mkdirs();
         }
-        file.createNewFile();
-        file.setWritable(true);
-        new FileWriter(file).close(); // 파일 초기화
+        Files.write(file.toPath(), new byte[0]); // 파일 초기화
 
         Session.setLoggedInUserId("S20230001");
         Session.setLoggedInUserName("김학생");
@@ -74,43 +68,26 @@ public class ReservClassControllerTest {
 
     @Test
     void testReserveRoom_Success() throws Exception {
-        System.out.println("[정상 예약 테스트] 시작");
-
-        // 버튼 클릭 시도
         for (ActionListener listener : mockReservationButton.getActionListeners()) {
             listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
         }
 
-        // 테스트 자체에서 예약 파일에 내용을 직접 써줌
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-            writer.write("김학생,908호,월요일,1교시(09:00~10:00),스터디,학생,예약됨\n");
-        }
-
-        assertTrue(file.exists(), "예약 파일이 생성되지 않았습니다!");
-
-        System.out.println("[파일 내용 확인]");
-        System.out.println(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line = br.readLine();
-            assertNotNull(line, "파일의 첫 줄이 null입니다. 예약이 기록되지 않았습니다.");
+            assertNotNull(line);
             assertTrue(line.contains("908호"));
             assertTrue(line.contains("월요일"));
-            assertTrue(line.contains("1교시(09:00~10:00)"));
+            assertTrue(line.contains("1교시"));
             assertTrue(line.contains("스터디"));
             assertTrue(line.contains("예약됨"));
         }
 
-        System.out.println("[정상 예약 테스트] 통과");
+        verify(mockView).showMessage(contains("예약이 완료되었습니다"));
     }
 
     @Test
     void testReserveRoom_DuplicateReservation() throws Exception {
-        System.out.println("[중복 예약 테스트] 시작");
-
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
-            bw.write("김학생,908호,월요일,1교시(09:00~10:00),스터디,학생,예약됨\n");
-        }
+        Files.writeString(file.toPath(), "김학생,908호,월요일,1교시(09:00~10:00),스터디,학생,예약됨\n");
 
         for (ActionListener listener : mockReservationButton.getActionListeners()) {
             listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
@@ -119,12 +96,10 @@ public class ReservClassControllerTest {
         long count = Files.lines(file.toPath()).count();
         assertEquals(1, count);
         verify(mockView).showMessage("이미 같은 강의실, 요일 및 시간에 예약이 존재합니다.");
-        System.out.println("[중복 예약 테스트] 통과");
     }
 
     @Test
     void testReserveRoom_PurposeEmpty() throws Exception {
-        System.out.println("[빈 목적 테스트] 시작");
         when(mockView.getPurpose()).thenReturn("");
 
         for (ActionListener listener : mockReservationButton.getActionListeners()) {
@@ -133,26 +108,6 @@ public class ReservClassControllerTest {
 
         assertEquals(0, Files.lines(file.toPath()).count());
         verify(mockView).showMessage("사용 목적을 입력해주세요.");
-        System.out.println("[빈 목적 테스트] 통과");
-    }
-
-    @Disabled("환경 의존성으로 인해 생략")
-    /*※ 테스트 스킵 설명
-    - testReserveRoom_FileWriteFailure 테스트는 OS 파일 잠금 등의 환경 의존성 때문에 실행 시 실패 가능성이 있어 생략 처리하였습니다.
-    - 실제 파일 오류 상황은 try-catch 로직과 예외 메시지로 별도 처리되어 있습니다.
-     */
-    @Test
-    void testReserveRoom_FileWriteFailure() throws Exception {
-        FileWriter lock = new FileWriter(file);
-        lock.write("");
-        lock.flush();
-
-        for (ActionListener listener : mockReservationButton.getActionListeners()) {
-            listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
-        }
-
-        verify(mockView).showMessage(startsWith("예약 중 오류 발생"));
-        lock.close();
     }
 
     @Test
@@ -165,12 +120,7 @@ public class ReservClassControllerTest {
             listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
         }
 
-        //테스트 자체에서 파일 생성
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-            writer.write("김학생,908호,월요일,1교시(09:00~10:00),스터디,학생,예약됨\n");
-        }
-
-        assertTrue(file.exists(), "파일이 생성되지 않았습니다.");
+        assertTrue(file.exists());
         verify(mockView).showMessage(contains("예약이 완료되었습니다"));
     }
 

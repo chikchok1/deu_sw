@@ -1,20 +1,35 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package View;
 
-/**
- *
- * @author YangJinWon
- */
-public class ChangePasswordView extends javax.swing.JFrame {
+import javax.swing.*;
 
-    public ChangePasswordView() {
-        initComponents();  
+public class ChangePasswordView extends JFrame {
+
+    private Executive executive;
+    private RoomSelect roomSelect;
+
+    // Executive에서 호출될 때
+    public ChangePasswordView(Executive executive) {
+        initComponents();
+        this.executive = executive;
+        this.roomSelect = null;
+
+        getBeforeButton().addActionListener(e -> {
+            this.dispose();
+            executive.setVisible(true);
+        });
     }
 
-// 비밀번호 값 가져오는 getter 추가
+    // RoomSelect에서 호출될 때
+    public ChangePasswordView(RoomSelect roomSelect) {
+        initComponents();
+        this.roomSelect = roomSelect;
+        this.executive = null;
+
+        getBeforeButton().addActionListener(e -> {
+            this.dispose();
+            roomSelect.setVisible(true);
+        });
+    }
 
     public String getPresentPassword() {
         return PresentPassword.getText();
@@ -24,10 +39,14 @@ public class ChangePasswordView extends javax.swing.JFrame {
         return ChangePassword.getText();
     }
 
-// 버튼 리스너 등록 메서드
     public void setSaveButtonListener(java.awt.event.ActionListener listener) {
         Save.addActionListener(listener);
     }
+
+    public JButton getBeforeButton() {
+        return Before;
+    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -44,6 +63,7 @@ public class ChangePasswordView extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         Save = new javax.swing.JButton();
+        Before = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -72,6 +92,13 @@ public class ChangePasswordView extends javax.swing.JFrame {
             }
         });
 
+        Before.setText("이전");
+        Before.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BeforeActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -86,7 +113,8 @@ public class ChangePasswordView extends javax.swing.JFrame {
                         .addGap(48, 48, 48)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel2)
-                            .addComponent(jLabel3))
+                            .addComponent(jLabel3)
+                            .addComponent(Before))
                         .addGap(31, 31, 31)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(PresentPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE)
@@ -110,7 +138,9 @@ public class ChangePasswordView extends javax.swing.JFrame {
                     .addComponent(ChangePassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 51, Short.MAX_VALUE)
-                .addComponent(Save)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(Save)
+                    .addComponent(Before))
                 .addGap(20, 20, 20))
         );
 
@@ -129,6 +159,10 @@ public class ChangePasswordView extends javax.swing.JFrame {
     private void SaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveActionPerformed
 
     }//GEN-LAST:event_SaveActionPerformed
+
+    private void BeforeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BeforeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_BeforeActionPerformed
 
     /**
      * @param args the command line arguments
@@ -163,12 +197,13 @@ public class ChangePasswordView extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ChangePasswordView().setVisible(true);
+                //new ChangePasswordView().setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton Before;
     private javax.swing.JTextField ChangePassword;
     private javax.swing.JTextField PresentPassword;
     private javax.swing.JButton Save;

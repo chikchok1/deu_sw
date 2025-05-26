@@ -1,194 +1,166 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Controller;
 
-/**
- *
- * @author YangJinWon
- */
 import Model.Session;
 import View.ReservClassView;
 import View.RoomSelect;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.net.Socket;
 import java.util.*;
-import javax.swing.JTable;
+import java.util.function.Consumer;
+import javax.swing.*;
 import javax.swing.table.*;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
 
 public class ReservClassController {
 
     private ReservClassView view;
     private Map<String, Set<String>> reservedMap = new HashMap<>();
 
-    // 생성자: View와 컨트롤러를 연결하고 버튼 리스너를 초기화
     public ReservClassController(ReservClassView view) {
         this.view = view;
         this.view.resetReservationButtonListener();
         this.view.addReservationListener(new ReservationListener());
 
-        // 이전 버튼 리스너 등록
         this.view.getBeforeButton().addActionListener(e -> {
             view.dispose();
-
             RoomSelect roomSelect = RoomSelect.getInstance();
             new RoomSelectController(roomSelect);
             roomSelect.setVisible(true);
-            view.dispose(); // 현재 ReservClassView 닫기
-
-        });
-        loadReservationData();
-        JTable initialTable = buildCalendarTable(view.getSelectedClassRoom());
-        view.updateCalendarTable(initialTable);
-
-        view.getClassComboBox().addActionListener(e -> {
-            String selectedRoom = view.getSelectedClassRoom();
-            loadReservationData();
-            JTable newTable = buildCalendarTable(selectedRoom);
-            view.updateCalendarTable(newTable);
         });
 
+        String selectedRoom = view.getSelectedClassRoom();
+        refreshReservationAndAvailability(selectedRoom);
+
+        this.view.getClassComboBox().addActionListener(e -> {
+            String newSelectedRoom = view.getSelectedClassRoom();
+            refreshReservationAndAvailability(newSelectedRoom);
+        });
     }
-    // 강의실 상태 확인 메서드
-    // 강의실 사용 가능 여부 확인 메서드
-    private boolean isRoomAvailable(String classRoom) {
-        classRoom = classRoom.replace("호", ""); // '호' 제거
-        String filePath = "data/RoomStatus.txt";
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] tokens = line.split(",");
-                if (tokens.length >= 2) {
-                    String room = tokens[0].trim();
-                    String status = tokens[1].trim();
-                    if (room.equals(classRoom)) {
-                        return status.equals("사용가능");
-                    }
+
+    private void refreshReservationAndAvailability(String roomName) {
+        checkRoomAvailability(roomName, isAvailable -> {
+            loadReservationDataFromServer(roomName);
+            JTable updatedTable = buildCalendarTable(roomName, isAvailable);
+            view.updateCalendarTable(updatedTable);
+        });
+    }
+
+    private void checkRoomAvailability(String classRoom, Consumer<Boolean> callback) {
+        new Thread(() -> {
+            boolean available = false;
+            try {
+                BufferedReader in = Session.getIn();
+                PrintWriter out = Session.getOut();
+                Socket socket = Session.getSocket();
+
+                if (in == null || out == null || socket == null || socket.isClosed()) {
+                    System.err.println("[ReservClassController] 서버 연결이 유효하지 않음");
+                    callback.accept(false);
+                    return;
                 }
+
+                String cleanClassRoom = classRoom.replace("호", "").trim();
+                out.println("CHECK_ROOM_STATUS," + cleanClassRoom);
+                out.flush();
+                String response = in.readLine();
+                available = "AVAILABLE".equals(response);
+            } catch (IOException e) {
+                System.err.println("[ReservClassController] 서버 통신 오류: " + e.getMessage());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return true; // 기본적으로 사용 불가로 처리
+
+            boolean finalAvailable = available;
+            SwingUtilities.invokeLater(() -> callback.accept(finalAvailable));
+        }).start();
     }
 
     class ReservationListener implements ActionListener {
-
         @Override
         public void actionPerformed(ActionEvent e) {
-            try {
-                // 세션에서 사용자 정보와 사용자가 선택한 예약 정보 가져오기
-                String userName = Session.getLoggedInUserName(); // 사용자 이름 가져오기
-                String selectedClassRoom = view.getSelectedClassRoom(); // 선택된 강의실
-                String selectedDay = view.getSelectedDay(); // 선택된 날짜
-                String selectedTime = view.getSelectedTime(); // 선택된 시간
-                String purpose = view.getPurpose(); // 예약 목적
+            String userName = Session.getLoggedInUserName();
+            String selectedClassRoom = view.getSelectedClassRoom();
+            String selectedDay = view.getSelectedDay();
+            String selectedTime = view.getSelectedTime();
+            String purpose = view.getPurpose();
 
-                // 예약 목적 유효성 확인
-                if (purpose.isEmpty()) {
-                    view.showMessage("사용 목적을 입력해주세요.");
+            if (purpose.isEmpty()) {
+                view.showMessage("사용 목적을 입력해주세요.");
+                return;
+            }
+
+            checkRoomAvailability(selectedClassRoom, isAvailable -> {
+                if (!isAvailable) {
+                    view.showMessage("선택하신 강의실은 현재 사용 불가능합니다. 관리자에게 문의하세요.");
                     return;
                 }
 
-                // 같은 요일, 시간, 강의실에 예약이 존재하는지 확인
-                if (isDuplicateReservation(selectedClassRoom, selectedDay, selectedTime)) {
-                    view.showMessage("이미 같은 강의실, 요일 및 시간에 예약이 존재합니다.");
-                    return;
+                String userRole = Session.getLoggedInUserRole();
+                String response = sendReservationRequestToServer(userName, selectedClassRoom, selectedDay, selectedTime, purpose, userRole);
+
+                switch (response) {
+                    case "RESERVE_SUCCESS":
+                        view.showMessage("예약이 완료되었습니다. 관리자 승인 후 처리됩니다.");
+                        view.closeView();
+                        RoomSelect roomSelect = new RoomSelect();
+                        new RoomSelectController(roomSelect);
+                        roomSelect.setVisible(true);
+                        break;
+                    case "RESERVE_CONFLICT":
+                        view.showMessage("해당 시간에 이미 예약이 존재합니다.");
+                        break;
+                    case "RESERVE_FAILED":
+                    default:
+                        view.showMessage("예약 중 오류가 발생했습니다.");
+                        break;
                 }
-                if (!isRoomAvailable(selectedClassRoom)) {
-                    view.showMessage("이 강의실은 현재 사용 불가능합니다.");
-                    return;
-                }
-
-                // 예약 요청을 ReservationRequest.txt에 '대기' 상태로 저장 (기존 즉시 예약 외에 추가 저장)
-                String userRole = Session.getLoggedInUserRole(); // 사용자 권한 (학생, 교수 등)
-                addReservationToRequestFile(userName, selectedClassRoom, selectedDay, selectedTime, purpose, userRole);
-
-                // 새로운 예약 정보를 파일에 추가 승인후에 처리해야 하므로 주석처리
-                //addReservationToFile(userName, selectedClassRoom, selectedDay, selectedTime, purpose);
-
-                // 성공 메시지 출력 및 현재 View 닫기
-                view.showMessage("예약이 완료되었습니다 승인 후 처리됩니다!");
-                view.closeView();
-
-                // 새로운 RoomSelect View로 전환
-                RoomSelect newRoomSelect = new RoomSelect();
-                new RoomSelectController(newRoomSelect);
-                newRoomSelect.setVisible(true);
-
-            } catch (Exception ex) {
-                ex.printStackTrace(); // 오류 로그 출력
-                view.showMessage("예약 중 오류 발생: " + ex.getMessage());
-            }
-        }
-
-        // 중복 예약 확인 메서드 (강의실, 요일, 시간 조건 포함)
-        private boolean isDuplicateReservation(String classRoom, String day, String time) {
-            try (BufferedReader reader = new BufferedReader(new FileReader("data/ReserveClass.txt"))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] tokens = line.split(",");
-                    if (tokens.length >= 5) {
-                        String storedClassRoom = tokens[1].trim();
-                        String storedDay = tokens[2].trim();
-                        String storedTime = tokens[3].trim();
-
-                        // 강의실, 요일, 시간이 모두 동일한 경우
-                        if (storedClassRoom.equals(classRoom) && storedDay.equals(day) && storedTime.equals(time)) {
-                            return true; // 중복 예약 있음
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace(); // 파일 읽기 오류 처리
-            }
-            return false; // 중복 예약 없음
-        }
-
-        private void addReservationToFile(String userName, String room, String day, String time, String purpose) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/ReserveClass.txt", true))) {
-                // 사용자 구분 가져오기 (예: S123 → 학생)
-                String userType = "알 수 없음";
-                String userId = Session.getLoggedInUserId();
-                if (userId != null && !userId.isEmpty()) {
-                    char typeChar = userId.charAt(0);
-                    switch (typeChar) {
-                        case 'S':
-                            userType = "학생";
-                            break;
-                        case 'P':
-                            userType = "교수";
-                            break;
-                        case 'A':
-                            userType = "조교";
-                            break;
-                    }
-                }
-
-                writer.write(userName + "," + room + "," + day + "," + time + "," + purpose + "," + userType + ",예약됨");
-                writer.newLine(); // 새 줄 추가
-            } catch (Exception e) {
-                e.printStackTrace(); // 파일 쓰기 오류 처리
-            }
+            });
         }
     }
 
-    private void loadReservationData() {
-        reservedMap.clear();
-        loadFromFile("data/ReserveClass.txt");
-        loadFromFile("data/ReservationRequest.txt");
+    private String sendReservationRequestToServer(String name, String room, String day, String time, String purpose, String role) {
+        String requestLine = String.join(",", "RESERVE_REQUEST", name, room, day, time, purpose, role);
+        PrintWriter out = Session.getOut();
+        BufferedReader in = Session.getIn();
+
+        try {
+            if (out != null && in != null) {
+                out.println(requestLine);
+                out.flush();
+                String response = in.readLine();
+                System.out.println("[ReservClassController] 서버 응답: " + response);
+                return response;
+            } else {
+                System.err.println("[ReservClassController] 서버 연결이 없습니다.");
+                return "RESERVE_FAILED";
+            }
+        } catch (IOException e) {
+            System.err.println("[ReservClassController] 예약 요청 전송 중 오류: " + e.getMessage());
+            return "RESERVE_FAILED";
+        }
     }
 
-    private void loadFromFile(String filePath) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+    private void loadReservationDataFromServer(String roomName) {
+        PrintWriter out = Session.getOut();
+        BufferedReader in = Session.getIn();
+
+        if (out == null || in == null) {
+            System.err.println("[loadReservationDataFromServer] 세션의 입출력 스트림이 null입니다.");
+            return;
+        }
+
+        try {
+            out.println("VIEW_RESERVATION," + Session.getLoggedInUserId() + "," + roomName);
+            out.flush();
+
+            String normalizedRoom = roomName.endsWith("호") ? roomName : roomName + "호";
+            reservedMap.put(normalizedRoom, new HashSet<>());
+
             String line;
-            while ((line = br.readLine()) != null) {
+            int readCount = 0;
+            while ((line = in.readLine()) != null) {
+                if (line.equals("END_OF_RESERVATION")) break;
+
                 String[] parts = line.split(",");
                 if (parts.length >= 7) {
                     String status = parts[6].trim();
@@ -196,48 +168,33 @@ public class ReservClassController {
                         String room = parts[1].trim();
                         String day = parts[2].trim().replace("요일", "");
                         String time = parts[3].trim().substring(0, 3);
-                        reservedMap.computeIfAbsent(room, k -> new HashSet<>())
-                                .add(day + "_" + time);
+
+                        room = room.endsWith("호") ? room : room + "호";
+                        reservedMap.computeIfAbsent(room, k -> new HashSet<>()).add(day + "_" + time);
+                        readCount++;
                     }
                 }
             }
+            System.out.println("[loadReservationDataFromServer] " + readCount + "개의 예약 정보 수신 완료");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("[loadReservationDataFromServer] 서버 응답 수신 중 오류: " + e.getMessage());
         }
     }
 
-    // 예약 여부 확인 메서드
-   private boolean isReserved(String room, String day, String time) {
-    // 🔧 room 값이 "914"처럼 들어오더라도 "914호"와 비교 가능하게 통일
-    if (!room.endsWith("호")) {
-        room = room + "호";
-    }
-
-    String key = day + "_" + time;
-    Set<String> reservedTimes = reservedMap.get(room);
-    return reservedTimes != null && reservedTimes.contains(key);
-}
-
-
-    // 🟩 [추가] 예약 요청 정보를 '대기' 상태로 따로 저장하는 메서드
-    private void addReservationToRequestFile(String name, String room, String day, String time, String purpose, String role) {
-        String line = String.join(",", name, room, day, time, purpose, role, "대기");
-        File file = new File("data/ReservationRequest.txt");
-        file.getParentFile().mkdirs();
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-            writer.write(line);
-            writer.newLine();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private boolean isReserved(String room, String day, String time) {
+        if (!room.endsWith("호")) {
+            room = room + "호";
         }
+
+        time = time.length() >= 3 ? time.substring(0, 3) : time;
+        String key = day + "_" + time;
+        Set<String> reservedTimes = reservedMap.get(room);
+        return reservedTimes != null && reservedTimes.contains(key);
     }
 
-    public JTable buildCalendarTable(String room) {
+    private JTable buildCalendarTable(String room, boolean roomAvailable) {
         String[] columnNames = {"교시", "월", "화", "수", "목", "금"};
         String[] times = {"1교시", "2교시", "3교시", "4교시", "5교시", "6교시", "7교시", "8교시", "9교시"};
-
-        boolean roomAvailable = isRoomAvailable(room); // 강의실 상태 확인
 
         DefaultTableModel model = new DefaultTableModel(times.length, columnNames.length);
         model.setColumnIdentifiers(columnNames);
@@ -258,8 +215,7 @@ public class ReservClassController {
 
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
                 if (column == 0) {
@@ -268,7 +224,7 @@ public class ReservClassController {
                     cell.setText(value != null ? value.toString() : "");
                 } else {
                     if (!roomAvailable) {
-                        cell.setBackground(Color.DARK_GRAY); // 사용불가일 경우 회색 표시
+                        cell.setBackground(Color.DARK_GRAY);
                         cell.setText("X");
                         cell.setForeground(Color.WHITE);
                     } else {
@@ -276,7 +232,7 @@ public class ReservClassController {
                         String time = times[row];
                         if (isReserved(room, day, time)) {
                             cell.setBackground(Color.RED);
-                            cell.setText(""); // 예약된 경우
+                            cell.setText("");
                         } else {
                             cell.setBackground(Color.WHITE);
                             cell.setText("");

@@ -1,22 +1,42 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package View;
 
-/**
- *
- * @author Sunghoon
- */
-public class ClientAdmin extends javax.swing.JFrame {
+import javax.swing.*;
 
-    /**
-     * Creates new form ClientAdmin
-     */
-    public ClientAdmin() {
+public class ClientAdmin extends JFrame {
+
+    private Executive executive;
+
+    public ClientAdmin(Executive executive) {
         initComponents();
+        this.executive = executive;
+
+        getJButton3().addActionListener(e -> {
+            this.dispose();
+            executive.setVisible(true);
+        });
     }
-    
+// getter 추가 (컨트롤러에서 사용할 수 있도록)
+
+    public Executive getExecutive() {
+        return executive;
+    }
+
+    public JTable getTable() {
+        return jTable2;
+    }
+
+    public JButton getJButton1() {
+        return jButton1;
+    }
+
+    public JButton getJButton2() {
+        return jButton2;
+    }
+
+    public JButton getJButton3() {
+        return jButton3;
+    }  // "이전" 버튼
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -167,34 +187,16 @@ public class ClientAdmin extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(ClientAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        
+
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ClientAdmin().setVisible(true);
+                //new ClientAdmin().setVisible(true);
             }
         });
     }
-    
-        public javax.swing.JTable getTable() {
-        return jTable2;
-        
-    }
 
-    public javax.swing.JButton getJButton1() {
-        return jButton1;
-    }
-
-    public javax.swing.JButton getJButton2() {
-        return jButton2;
-    }
-    
-    public javax.swing.JButton getJButton3() {
-        return jButton3;
-    }
-    
-    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;

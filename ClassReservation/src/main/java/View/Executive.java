@@ -40,7 +40,7 @@ public class Executive extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        ChangePassword = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jButton5 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
@@ -70,7 +70,12 @@ public class Executive extends javax.swing.JFrame {
             }
         });
 
-        jButton4.setText("비밀번호 변경");
+        ChangePassword.setText("비밀번호 변경");
+        ChangePassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ChangePasswordActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("예약내역 및 강의실 관리");
 
@@ -82,8 +87,18 @@ public class Executive extends javax.swing.JFrame {
         });
 
         jButton6.setText("예약승인");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
 
         jButton7.setText("예약취소");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -106,7 +121,7 @@ public class Executive extends javax.swing.JFrame {
                             .addComponent(jButton7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(61, 61, 61)
-                        .addComponent(jButton4)))
+                        .addComponent(ChangePassword)))
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addGap(132, 132, 132)
@@ -129,7 +144,7 @@ public class Executive extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton3)
-                    .addComponent(jButton4)
+                    .addComponent(ChangePassword)
                     .addComponent(jButton6))
                 .addGap(15, 15, 15))
         );
@@ -153,6 +168,18 @@ public class Executive extends javax.swing.JFrame {
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void ChangePasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ChangePasswordActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_ChangePasswordActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton7ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton6ActionPerformed
     
     /**
      * @param args the command line arguments
@@ -184,7 +211,7 @@ public class Executive extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Executive().setVisible(true);
+                //new Executive().setVisible(true);
             }
         });
     }
@@ -198,6 +225,19 @@ public javax.swing.JButton  getJButton2() {
 public javax.swing.JButton getJButton3() {
     return jButton3;
 }
+public void setChangePasswordActionListener(java.awt.event.ActionListener listener) {
+        System.out.println("ChangePassword 버튼 상태: " + (ChangePassword == null ? "null" : "정상"));
+
+            System.out.println("비밀번호 변경 리스너 등록 시도");  // 로그 추가
+
+        for (java.awt.event.ActionListener al : ChangePassword.getActionListeners()) {
+            ChangePassword.removeActionListener(al);
+        }
+        ChangePassword.addActionListener(listener);
+            System.out.println("등록된 리스너 수: " + ChangePassword.getActionListeners().length);
+
+    }
+
 public javax.swing.JButton getJButton5() {
     return jButton5;
 }
@@ -209,10 +249,10 @@ public javax.swing.JButton getJButton6() {
  
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton ChangePassword;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;

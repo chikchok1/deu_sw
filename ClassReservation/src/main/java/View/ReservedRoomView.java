@@ -1,39 +1,52 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package View;
 
-/**
- *
- * @author YangJinWon
- */
-public class ReservedRoomView extends javax.swing.JFrame {
+import javax.swing.*;
 
-    public ReservedRoomView() {
+public class ReservedRoomView extends JFrame {
+    private Executive executive;
+    private RoomSelect roomSelect;
+    private boolean isUpdating = false;
+
+    // 생성자: Executive 또는 RoomSelect 중 하나만 전달받음
+    public ReservedRoomView(Executive executive) {
         initComponents();
-
+        this.executive = executive;
+        this.roomSelect = null;
     }
-private boolean isUpdating = false;
 
-// ↓ View 요소에 접근할 수 있는 Getter 메서드들
-    public javax.swing.JComboBox<String> getClassComboBox() {
+    public ReservedRoomView(RoomSelect roomSelect) {
+        initComponents();
+        this.roomSelect = roomSelect;
+        this.executive = null;
+    }
+
+    // ✔ getter로 컨트롤러에서 창 재활용 여부 판단
+    public Executive getExecutive() {
+        return executive;
+    }
+
+    public RoomSelect getRoomSelect() {
+        return roomSelect;
+    }
+
+    // 뷰 UI 컴포넌트 접근용 Getter
+    public JComboBox<String> getClassComboBox() {
         return Class;
     }
 
-    public javax.swing.JComboBox<String> getLabComboBox() {
+    public JComboBox<String> getLabComboBox() {
         return Lab;
     }
 
-    public javax.swing.JButton getCheckButton() {
+    public JButton getCheckButton() {
         return Check;
     }
 
-    public javax.swing.JButton getBeforeButton() {
+    public JButton getBeforeButton() {
         return Before;
     }
 
-    public javax.swing.JTable getTable() {
+    public JTable getTable() {
         return jTable1;
     }
 
@@ -58,7 +71,7 @@ private boolean isUpdating = false;
     public void resetLabSelection() {
         Lab.setSelectedItem("선택");
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -243,7 +256,7 @@ private boolean isUpdating = false;
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ReservedRoomView().setVisible(true);
+                //new ReservedRoomView().setVisible(true);
             }
         });
     }

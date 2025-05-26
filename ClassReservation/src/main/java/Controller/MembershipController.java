@@ -1,13 +1,13 @@
 package Controller;
 
-import Model.MembershipModel;
+import common.model.MembershipModel;
 import View.LoginForm;
 import View.MembershipView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.Socket;
-import utils.ConfigLoader;
+import common.utils.ConfigLoader;
 
 public class MembershipController {
     private MembershipView view;

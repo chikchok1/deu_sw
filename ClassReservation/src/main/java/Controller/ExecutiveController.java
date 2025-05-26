@@ -5,89 +5,92 @@ import View.ReservedRoomView;
 import View.LoginForm;
 import View.RoomAdmin;
 import View.ClientAdmin;
-import Model.UserDAO;
+import View.ChangePasswordView;
+import View.ClassroomReservationApproval;
 import Model.Session;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.*;
 import java.io.BufferedReader;
-import java.io.PrintWriter;
-
-import Model.UserDAO;
-import View.ClientAdmin;
-import Controller.RoomAdminController;
-import javax.swing.JOptionPane;
-import java.io.FileReader;
 import java.io.IOException;
-
+import java.io.PrintWriter;
 
 public class ExecutiveController {
 
-    private Executive executive;
+    private final Executive executive;
     private static boolean hasShownAlert = false;
-
 
     public ExecutiveController(Executive executive) {
         this.executive = executive;
 
-        // 예약 요청 알림 확인
+        this.executive.setChangePasswordActionListener(e -> openChangePasswordView());
+
+        // 예약 요청 알림
         if (!hasShownAlert) {
-            int count = countPendingRequests("data/ReservationRequest.txt");
+            int count = getPendingRequestCountFromServer();
             if (count > 0) {
                 JOptionPane.showMessageDialog(
-                    executive,
-                    "📌 현재 대기 중인 예약 요청이 총 " + count + "건 있습니다.",
-                    "예약 요청 알림",
-                    JOptionPane.INFORMATION_MESSAGE
+                        executive,
+                        "현재 대기 중인 예약 요청이 총 " + count + "건 있습니다.",
+                        "예약 요청 알림",
+                        JOptionPane.INFORMATION_MESSAGE
                 );
             }
             hasShownAlert = true;
         }
 
-        // [1] "예약 확인" 버튼
-        this.executive.getViewReservedButton().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openReservedRoomView();
-            }
-        });
+        // [1] 예약 확인
+        this.executive.getViewReservedButton().addActionListener(e -> openReservedRoomView());
 
-        // [2] "강의실 및 실습실 관리" 버튼
-        this.executive.getJButton2().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openRoomAdminView();
-            }
-        });
+        // [2] 강의실/실습실 관리
+        this.executive.getJButton2().addActionListener(e -> openRoomAdminView());
 
-        // [3] "로그아웃" 버튼
-        this.executive.getJButton3().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                logout();
-            }
-        });
+        // [3] 로그아웃
+        this.executive.getJButton3().addActionListener(e -> logout());
 
-        // [4] "고객 관리" 버튼
-        this.executive.getJButton5().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openClientAdminView();
-            }
-        });
+        // [4] 고객 관리
+        this.executive.getJButton5().addActionListener(e -> openClientAdminView());
 
-        // [5] "예약 승인" 버튼
-        this.executive.getJButton6().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openReservationApprovalView();
-            }
-        });
+        // [5] 예약 승인
+        this.executive.getJButton6().addActionListener(e -> openReservationApprovalView());
+    }
+
+    private void openReservedRoomView() {
+        ReservedRoomView view = new ReservedRoomView(executive);
+        new ReservedRoomController(view);
+        view.setVisible(true);
+        executive.setVisible(false);
+    }
+
+    private void openRoomAdminView() {
+        RoomAdmin view = new RoomAdmin(executive);
+        new RoomAdminController(view);
+        view.setVisible(true);
+        executive.setVisible(false);
+    }
+
+    private void openClientAdminView() {
+        ClientAdmin view = new ClientAdmin(executive);
+        new ClientAdminController(view);
+        view.setVisible(true);
+        executive.setVisible(false);
+    }
+
+    private void openReservationApprovalView() {
+        ClassroomReservationApproval view = new ClassroomReservationApproval(executive);
+        new ClassroomReservationApprovalController(view);
+        view.setVisible(true);
+        executive.setVisible(false);
+    }
+
+    private void openChangePasswordView() {
+        ChangePasswordView changePasswordView = new ChangePasswordView(executive);  // ✅ Executive 전달
+        new ChangePasswordController(changePasswordView);
+        changePasswordView.setVisible(true);
+        executive.setVisible(false);  // ✅ 창 숨김 (재사용 목적)
     }
 
     private void logout() {
         try {
-            // 서버에 EXIT 명령 전송
             PrintWriter out = Session.getOut();
             BufferedReader in = Session.getIn();
 
@@ -96,7 +99,6 @@ public class ExecutiveController {
                 out.flush();
             }
 
-            // 서버 응답 확인 (선택)
             if (in != null) {
                 String response = in.readLine();
                 System.out.println("서버 응답: " + response);
@@ -104,56 +106,34 @@ public class ExecutiveController {
         } catch (Exception ex) {
             System.out.println("로그아웃 중 오류: " + ex.getMessage());
         } finally {
-            // 세션 정리
             Session.clear();
-
-            // Executive 창 닫고 로그인 창 다시 열기
-            executive.setVisible(false);
             executive.dispose();
 
             LoginForm loginForm = new LoginForm();
-            UserDAO dao = new UserDAO();
-            new LoginController(loginForm, dao);
+            new LoginController(loginForm);
             loginForm.setVisible(true);
         }
     }
 
-    private void openReservedRoomView() {
-        ReservedRoomView reservedView = new ReservedRoomView();
-        new ReservedRoomController(reservedView);
-        reservedView.setVisible(true);
-    }
+    private int getPendingRequestCountFromServer() {
+        PrintWriter out = Session.getOut();
+        BufferedReader in = Session.getIn();
 
-    private void openRoomAdminView() {
-        RoomAdmin roomAdmin = new RoomAdmin();
-        new RoomAdminController(roomAdmin);
-        roomAdmin.setVisible(true);
-    }
+        if (out == null || in == null) {
+            System.out.println("서버 연결이 없습니다.");
+            return 0;
+        }
 
-    private void openClientAdminView() {
-        ClientAdmin clientAdmin = new ClientAdmin();
-        new ClientAdminController(clientAdmin);
-        clientAdmin.setVisible(true);
-    }
-
-    private void openReservationApprovalView() {
-        executive.dispose();
-        View.ClassroomReservationApproval approvalView = new View.ClassroomReservationApproval();
-        new Controller.ClassroomReservationApprovalController(approvalView);
-        approvalView.setVisible(true);
-    }
-    private int countPendingRequests(String filePath) {
-        int count = 0;
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (!line.trim().isEmpty()) {
-                    count++;
-                }
+        try {
+            out.println("COUNT_PENDING_REQUEST");
+            out.flush();
+            String response = in.readLine();
+            if (response != null && response.startsWith("PENDING_COUNT:")) {
+                return Integer.parseInt(response.split(":")[1].trim());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("서버 응답 오류: " + e.getMessage());
         }
-        return count;
+        return 0;
     }
 }

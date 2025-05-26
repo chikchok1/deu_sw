@@ -9,8 +9,8 @@ package Controller;
  * @author minju
  */
 
-import Model.ReservedRoomModel;
-import Model.User;
+import common.model.ReservedRoomModel;
+import common.model.User;
 import View.ReservedRoomView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
