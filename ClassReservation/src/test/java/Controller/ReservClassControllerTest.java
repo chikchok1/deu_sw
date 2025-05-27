@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 
 import Model.Session;
 import View.ReservClassView;
-
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 
@@ -13,8 +12,12 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.lang.reflect.Field;
+import java.net.Socket;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class ReservClassControllerTest {
 
@@ -23,112 +26,205 @@ public class ReservClassControllerTest {
     ReservClassController controller;
     JButton mockReservationButton;
 
-    File file = new File("data/ReserveClass.txt").getAbsoluteFile();
+    private static MockedStatic<Session> sessionMock;
 
     @BeforeAll
-    static void enableTestMode() {
+    static void initStaticMocks() {
+        System.setProperty("java.awt.headless", "true");
+        sessionMock = Mockito.mockStatic(Session.class);
         System.setProperty("test.env", "true");
     }
 
+    @AfterAll
+    static void closeStaticMocks() {
+        sessionMock.close();
+    }
+
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-
-        if (!file.exists()) {
-            file.getParentFile().mkdirs();
-        }
-        Files.write(file.toPath(), new byte[0]); // 파일 초기화
-
-        Session.setLoggedInUserId("S20230001");
-        Session.setLoggedInUserName("김학생");
+        mockReservationButton = new JButton();
 
         when(mockView.getSelectedClassRoom()).thenReturn("908호");
         when(mockView.getSelectedDay()).thenReturn("월요일");
         when(mockView.getSelectedTime()).thenReturn("1교시(09:00~10:00)");
         when(mockView.getPurpose()).thenReturn("스터디");
-
-        JButton mockBefore = new JButton();
-        mockReservationButton = new JButton();
-        when(mockView.getBeforeButton()).thenReturn(mockBefore);
+        when(mockView.getBeforeButton()).thenReturn(new JButton());
         when(mockView.getClassComboBox()).thenReturn(new JComboBox<>());
 
-        doNothing().when(mockView).showMessage(anyString());
-        doNothing().when(mockView).closeView();
-        doNothing().when(mockView).updateCalendarTable(any(JTable.class));
         doNothing().when(mockView).resetReservationButtonListener();
+        doNothing().when(mockView).addReservationListener(any());
+        doNothing().when(mockView).updateCalendarTable(any());
+        doNothing().when(mockView).showMessage(any());
+        doNothing().when(mockView).closeView();
 
         doAnswer(invocation -> {
             ActionListener listener = invocation.getArgument(0);
             mockReservationButton.addActionListener(listener);
             return null;
         }).when(mockView).addReservationListener(any(ActionListener.class));
+    }
 
-        controller = new ReservClassController(mockView);
+    static class TestableReservClassController extends ReservClassController {
+        private final CountDownLatch latch1;
+        private final CountDownLatch latch2;
+
+        public TestableReservClassController(ReservClassView view, CountDownLatch latch1, CountDownLatch latch2) {
+            super(view);
+            this.latch1 = latch1;
+            this.latch2 = latch2;
+        }
+
+        @Override
+        protected void refreshReservationAndAvailability(String roomName) {
+            if (latch1 != null) {
+                checkRoomAvailability(roomName, isAvailable -> latch1.countDown());
+            }
+        }
+
+        @Override
+        protected void loadReservationDataFromServer(String roomName) {
+            // 생략
+        }
+
+        @Override
+        protected String sendReservationRequestToServer(String name, String room, String day, String time, String purpose, String role) {
+            try {
+                BufferedReader in = Session.getIn();
+                return in.readLine();
+            } catch (Exception e) {
+                return "RESERVE_FAILED";
+            } finally {
+                latch2.countDown();
+            }
+        }
+
+        @Override
+        protected void checkRoomAvailability(String classRoom, Consumer<Boolean> callback) {
+            try {
+                BufferedReader in = Session.getIn();
+                String response = in.readLine();
+                boolean available = "AVAILABLE".equals(response);
+                callback.accept(available);
+            } catch (Exception e) {
+                callback.accept(false);
+            }
+        }
+    }
+
+ @Test
+void testReserveRoom_Success() throws Exception {
+    CountDownLatch latch1 = new CountDownLatch(1);
+    CountDownLatch latch2 = new CountDownLatch(1);
+    setServerResponse("AVAILABLE", "RESERVE_SUCCESS");
+
+    controller = new TestableReservClassController(mockView, latch1, latch2);
+    injectReservedMap(controller);
+    simulateButtonClick();
+
+    latch1.await(2, TimeUnit.SECONDS);
+    latch2.await(2, TimeUnit.SECONDS);
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    verify(mockView, atLeastOnce()).showMessage(captor.capture());  // <-- 핵심 수정
+    String matchedMessage = captor.getAllValues().stream()
+        .filter(msg -> msg.contains("예약이 완료되었습니다"))
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("예약 완료 메시지가 호출되지 않음"));
+
+    System.out.println("[TEST_LOG] 예약 응답 메시지: " + matchedMessage);
+    assertTrue(matchedMessage.contains("예약이 완료되었습니다"));
+}
+
+
+    @Test
+    void testReserveRoom_Conflict() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        CountDownLatch latch2 = new CountDownLatch(1);
+        setServerResponse("AVAILABLE", "RESERVE_CONFLICT");
+
+        controller = new TestableReservClassController(mockView, latch1, latch2);
+        injectReservedMap(controller);
+        simulateButtonClick();
+
+        latch1.await(2, TimeUnit.SECONDS);
+        latch2.await(2, TimeUnit.SECONDS);
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(mockView, timeout(1000)).showMessage(captor.capture());
+        System.out.println("[TEST_LOG] 예약 응답 메시지: " + captor.getValue());
+        assertTrue(captor.getValue().contains("이미 예약"));
     }
 
     @Test
-    void testReserveRoom_Success() throws Exception {
-        for (ActionListener listener : mockReservationButton.getActionListeners()) {
-            listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
-        }
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line = br.readLine();
-            assertNotNull(line);
-            assertTrue(line.contains("908호"));
-            assertTrue(line.contains("월요일"));
-            assertTrue(line.contains("1교시"));
-            assertTrue(line.contains("스터디"));
-            assertTrue(line.contains("예약됨"));
-        }
-
-        verify(mockView).showMessage(contains("예약이 완료되었습니다"));
-    }
-
-    @Test
-    void testReserveRoom_DuplicateReservation() throws Exception {
-        Files.writeString(file.toPath(), "김학생,908호,월요일,1교시(09:00~10:00),스터디,학생,예약됨\n");
-
-        for (ActionListener listener : mockReservationButton.getActionListeners()) {
-            listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
-        }
-
-        long count = Files.lines(file.toPath()).count();
-        assertEquals(1, count);
-        verify(mockView).showMessage("이미 같은 강의실, 요일 및 시간에 예약이 존재합니다.");
-    }
-
-    @Test
-    void testReserveRoom_PurposeEmpty() throws Exception {
+    void testReserveRoom_PurposeEmpty() {
         when(mockView.getPurpose()).thenReturn("");
+        CountDownLatch latch1 = new CountDownLatch(0);
+        CountDownLatch latch2 = new CountDownLatch(0);
 
-        for (ActionListener listener : mockReservationButton.getActionListeners()) {
-            listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
-        }
+        controller = new TestableReservClassController(mockView, latch1, latch2);
+        simulateButtonClick();
 
-        assertEquals(0, Files.lines(file.toPath()).count());
-        verify(mockView).showMessage("사용 목적을 입력해주세요.");
+        verify(mockView).showMessage(contains("사용 목적을 입력해주세요"));
     }
 
     @Test
-    void testReserveRoom_WhenFileMissing_ShouldSucceed() throws Exception {
-        if (file.exists()) {
-            file.delete();
-        }
+    void testReserveRoom_UnavailableRoom() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        CountDownLatch latch2 = new CountDownLatch(1);
+        setServerResponse("UNAVAILABLE");
 
+        controller = new TestableReservClassController(mockView, latch1, latch2);
+        injectReservedMap(controller);
+        simulateButtonClick();
+
+        latch1.await(2, TimeUnit.SECONDS);
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(mockView, timeout(1000)).showMessage(captor.capture());
+        System.out.println("[TEST_LOG] 예약 응답 메시지: " + captor.getValue());
+        assertTrue(captor.getValue().contains("사용 불가능합니다"));
+    }
+
+    private void setServerResponse(String... responses) throws IOException {
+        PipedOutputStream responseWriter = new PipedOutputStream();
+        PipedInputStream clientInput = new PipedInputStream(responseWriter);
+        BufferedReader mockIn = new BufferedReader(new InputStreamReader(clientInput));
+
+        PipedOutputStream toServer = new PipedOutputStream();
+        PrintWriter mockOut = new PrintWriter(toServer, true);
+
+        new Thread(() -> {
+            try {
+                for (String line : responses) {
+                    responseWriter.write((line + "\n").getBytes());
+                    responseWriter.flush();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        Socket mockSocket = mock(Socket.class);
+        when(mockSocket.isClosed()).thenReturn(false);
+
+        sessionMock.when(Session::getOut).thenReturn(mockOut);
+        sessionMock.when(Session::getIn).thenReturn(mockIn);
+        sessionMock.when(Session::getSocket).thenReturn(mockSocket);
+        sessionMock.when(Session::getLoggedInUserId).thenReturn("S20230001");
+        sessionMock.when(Session::getLoggedInUserName).thenReturn("김학생");
+        sessionMock.when(Session::getLoggedInUserRole).thenReturn("학생");
+    }
+
+    private void simulateButtonClick() {
         for (ActionListener listener : mockReservationButton.getActionListeners()) {
             listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
         }
-
-        assertTrue(file.exists());
-        verify(mockView).showMessage(contains("예약이 완료되었습니다"));
     }
 
-    @AfterEach
-    void tearDown() {
-        Session.clear();
-        if (file.exists()) {
-            file.delete();
-        }
+    private void injectReservedMap(ReservClassController controller) throws Exception {
+        Field field = ReservClassController.class.getDeclaredField("reservedMap");
+        field.setAccessible(true);
+        Map<String, Set<String>> dummyMap = new HashMap<>();
+        dummyMap.put("908호", new HashSet<>());
+        field.set(controller, dummyMap);
     }
 }

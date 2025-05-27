@@ -39,7 +39,7 @@ public class ReservClassController {
         });
     }
 
-    private void refreshReservationAndAvailability(String roomName) {
+    protected void refreshReservationAndAvailability(String roomName) {
         checkRoomAvailability(roomName, isAvailable -> {
             loadReservationDataFromServer(roomName);
             JTable updatedTable = buildCalendarTable(roomName, isAvailable);
@@ -47,7 +47,7 @@ public class ReservClassController {
         });
     }
 
-    private void checkRoomAvailability(String classRoom, Consumer<Boolean> callback) {
+    protected void checkRoomAvailability(String classRoom, Consumer<Boolean> callback) {
         new Thread(() -> {
             boolean available = false;
             try {
@@ -118,7 +118,7 @@ public class ReservClassController {
         }
     }
 
-    private String sendReservationRequestToServer(String name, String room, String day, String time, String purpose, String role) {
+    protected String sendReservationRequestToServer(String name, String room, String day, String time, String purpose, String role) {
         String requestLine = String.join(",", "RESERVE_REQUEST", name, room, day, time, purpose, role);
         PrintWriter out = Session.getOut();
         BufferedReader in = Session.getIn();
@@ -140,7 +140,7 @@ public class ReservClassController {
         }
     }
 
-    private void loadReservationDataFromServer(String roomName) {
+    protected void loadReservationDataFromServer(String roomName) {
         PrintWriter out = Session.getOut();
         BufferedReader in = Session.getIn();
 

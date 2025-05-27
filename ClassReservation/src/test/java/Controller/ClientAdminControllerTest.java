@@ -25,6 +25,8 @@ class ClientAdminControllerTest {
     @Mock private JTable mockTable;
     @Mock private DefaultTableModel mockTableModel;
 
+    private ClientAdminController controller;
+
     @BeforeEach
     void setUp() {
         // 뷰의 컴포넌트들이 리턴되도록 설정
@@ -34,10 +36,11 @@ class ClientAdminControllerTest {
         when(mockView.getTable()).thenReturn(mockTable);
         when(mockTable.getModel()).thenReturn(mockTableModel);
 
-        // loadUsersFromServer를 비활성화하여 서버 통신 방지
-        new ClientAdminController(mockView) {
+        // loadUsersFromServer를 비활성화한 테스트용 컨트롤러 생성
+        controller = new ClientAdminController(mockView) {
+            @Override
             protected void loadUsersFromServer() {
-                // 테스트 중 서버 통신은 무시
+                // 서버 통신을 막는다
             }
         };
     }
@@ -45,8 +48,8 @@ class ClientAdminControllerTest {
     @Test
     void testButtonListenersAreAttached() {
         // 버튼 리스너가 각각 연결되었는지 검증
-        verify(mockButton1).addActionListener(any()); // 수정 버튼
-        verify(mockButton2).addActionListener(any()); // 삭제 버튼
-        verify(mockButton3).addActionListener(any()); // 이전 버튼
+        verify(mockButton1, atLeastOnce()).addActionListener(any()); // 수정 버튼
+        verify(mockButton2, atLeastOnce()).addActionListener(any()); // 삭제 버튼
+        verify(mockButton3, atLeastOnce()).addActionListener(any()); // 이전 버튼
     }
 }

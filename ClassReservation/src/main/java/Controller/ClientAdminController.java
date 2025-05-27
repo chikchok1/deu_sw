@@ -22,7 +22,7 @@ public class ClientAdminController {
         view.getJButton3().addActionListener(e -> goBackToExecutive());
     }
 
-    private void loadUsersFromServer() {
+    protected void loadUsersFromServer() {
         DefaultTableModel model = (DefaultTableModel) view.getTable().getModel();
         model.setRowCount(0);  // 기존 데이터 초기화
 
