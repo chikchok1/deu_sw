@@ -20,6 +20,7 @@ public class ChangePasswordControllerTest {
     private ChangePasswordView mockView;
     private ChangePasswordController controller;
     private MockedStatic<Session> sessionMock;
+    private MockedStatic<JOptionPane> mockJOptionPane;
 
     @BeforeEach
     void setUp() {
@@ -29,11 +30,16 @@ public class ChangePasswordControllerTest {
 
         sessionMock = mockStatic(Session.class);
         sessionMock.when(Session::getLoggedInUserId).thenReturn("S1234");
+
+        mockJOptionPane = mockStatic(JOptionPane.class);
+        mockJOptionPane.when(() -> JOptionPane.showMessageDialog(any(), any()))
+                       .thenAnswer(invocation -> null);
     }
 
     @AfterEach
     void tearDown() {
         if (sessionMock != null) sessionMock.close();
+        if (mockJOptionPane != null) mockJOptionPane.close(); // 꼭 닫아야 중복 방지됨
     }
 
     @Test
@@ -67,12 +73,8 @@ public class ChangePasswordControllerTest {
         try (
             MockedStatic<GraphicsEnvironment> graphicsMock = mockStatic(GraphicsEnvironment.class);
             MockedConstruction<View.RoomSelect> roomSelectMock = mockConstruction(View.RoomSelect.class);
-            MockedConstruction<View.Executive> executiveMock = mockConstruction(View.Executive.class);
-            MockedStatic<JOptionPane> mockJOptionPane = mockStatic(JOptionPane.class)
+            MockedConstruction<View.Executive> executiveMock = mockConstruction(View.Executive.class)
         ) {
-            mockJOptionPane.when(() -> JOptionPane.showMessageDialog(any(), any()))
-                           .thenAnswer(invocation -> null);
-
             graphicsMock.when(GraphicsEnvironment::isHeadless).thenReturn(false);
             GraphicsEnvironment fakeEnv = mock(GraphicsEnvironment.class);
             graphicsMock.when(GraphicsEnvironment::getLocalGraphicsEnvironment).thenReturn(fakeEnv);
@@ -109,13 +111,8 @@ public class ChangePasswordControllerTest {
             }
         }).start();
 
-        try (MockedStatic<JOptionPane> mockJOptionPane = mockStatic(JOptionPane.class)) {
-            mockJOptionPane.when(() -> JOptionPane.showMessageDialog(any(), any()))
-                           .thenAnswer(invocation -> null);
-
-            controller.changePassword();
-            verify(mockView, never()).dispose();
-        }
+        controller.changePassword();
+        verify(mockView, never()).dispose();
     }
 
     @Test
@@ -123,16 +120,11 @@ public class ChangePasswordControllerTest {
         when(mockView.getPresentPassword()).thenReturn("");
         when(mockView.getChangePassword()).thenReturn("");
 
-        try (MockedStatic<JOptionPane> mockJOptionPane = mockStatic(JOptionPane.class)) {
-            mockJOptionPane.when(() -> JOptionPane.showMessageDialog(any(), any()))
-                           .thenAnswer(invocation -> null);
+        controller.changePassword();
 
-            controller.changePassword();
-
-            mockJOptionPane.verify(() ->
-                JOptionPane.showMessageDialog(any(), eq("모든 필드를 입력해주세요.")),
-                times(1)
-            );
-        }
+        mockJOptionPane.verify(() ->
+            JOptionPane.showMessageDialog(any(), eq("모든 필드를 입력해주세요.")),
+            times(1)
+        );
     }
 }
