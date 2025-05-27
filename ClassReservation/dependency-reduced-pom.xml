@@ -11,6 +11,8 @@
         <version>3.0.0-M9</version>
         <configuration>
           <argLine>-Dfile.encoding=UTF-8 -Djava.awt.headless=true</argLine>
+          <parallel>none</parallel>
+          <reuseForks>false</reuseForks>
         </configuration>
       </plugin>
       <plugin>

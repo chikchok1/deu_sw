@@ -14,7 +14,7 @@ import org.mockito.MockedStatic;
 
 import static org.mockito.Mockito.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD) // 🔄 변경됨
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 public class ChangePasswordControllerTest {
 
     private ChangePasswordView mockView;
@@ -68,7 +68,7 @@ public class ChangePasswordControllerTest {
             MockedStatic<GraphicsEnvironment> graphicsMock = mockStatic(GraphicsEnvironment.class);
             MockedConstruction<View.RoomSelect> roomSelectMock = mockConstruction(View.RoomSelect.class);
             MockedConstruction<View.Executive> executiveMock = mockConstruction(View.Executive.class);
-            MockedStatic<JOptionPane> mockJOptionPane = mockStatic(JOptionPane.class) // 🧩 이 위치에서 선언
+            MockedStatic<JOptionPane> mockJOptionPane = mockStatic(JOptionPane.class)
         ) {
             mockJOptionPane.when(() -> JOptionPane.showMessageDialog(any(), any()))
                            .thenAnswer(invocation -> null);
