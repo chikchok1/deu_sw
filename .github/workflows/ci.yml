@@ -11,42 +11,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 현재 레포 (client 프로젝트)
+      # client 프로젝트 (현재 레포)
       - name: Checkout ClassReservation (client)
         uses: actions/checkout@v3
 
-      # 공통 모듈 (공개 레포)
+      # 공통 모듈 (deu_sw_common)
       - name: Checkout ClassReservationCommon
         uses: actions/checkout@v3
         with:
           repository: chikchok1/deu_sw_common
           path: common
 
-      # 서버 모듈 (공개 레포)
+      # 서버 모듈 (deu_sw_server)
       - name: Checkout ClassReservationServer
         uses: actions/checkout@v3
         with:
           repository: chikchok1/deu_sw_server
           path: server
 
-      # JDK 설치
+      # JDK 설정
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      # 공통 모듈 install
+      # ✅ 공통 모듈 먼저 install
       - name: Install Common Module
         working-directory: ./common
         run: mvn clean install
 
-      # 서버 모듈 install
+      # ✅ 서버 모듈도 install
       - name: Install Server Module
         working-directory: ./server
         run: mvn clean install
 
-      # 클라이언트 모듈 테스트
-      - name: Build & Test ClassReservation
+      # ✅ 이제 client 빌드
+      - name: Build and Test Client Module
         working-directory: ./ClassReservation
         run: mvn -B test
