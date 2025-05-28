@@ -40,12 +40,12 @@ public class ReservLabController {
         });
     }
 
-    private void refreshReservationData(String roomName) {
+    protected void refreshReservationData(String roomName) {
         reservedMap.clear();
         loadReservationDataFromServer(roomName);
     }
 
-    private void checkRoomAvailability(String room, Consumer<Boolean> callback) {
+    protected void checkRoomAvailability(String room, Consumer<Boolean> callback) {
         new Thread(() -> {
             boolean available = false;
             try {
@@ -67,7 +67,7 @@ public class ReservLabController {
         }).start();
     }
 
-    private void loadReservationDataFromServer(String roomName) {
+    protected void loadReservationDataFromServer(String roomName) {
         PrintWriter out = Session.getOut();
         BufferedReader in = Session.getIn();
 
@@ -108,7 +108,7 @@ public class ReservLabController {
         return reservedTimes != null && reservedTimes.contains(key);
     }
 
-    private String sendReservationRequestToServer(String name, String room, String day, String time, String purpose, String role) {
+    protected String sendReservationRequestToServer(String name, String room, String day, String time, String purpose, String role) {
         PrintWriter out = Session.getOut();
         BufferedReader in = Session.getIn();
 

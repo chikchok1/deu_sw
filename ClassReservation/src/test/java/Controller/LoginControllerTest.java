@@ -28,6 +28,11 @@ class LoginControllerTest {
     void setup() {
         when(mockView.getUserId()).thenReturn("S20230001");
         when(mockView.getPassword()).thenReturn("1234");
+
+        // 서버 연결 실패를 가정한 상태 명확히 지정
+        Session.setSocket(null);
+        Session.setOut(null);
+        Session.setIn(null);
     }
 
     /**

@@ -122,7 +122,7 @@ public class ReservLabControllerTest {
         latch2.await(2, TimeUnit.SECONDS);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(mockView, atLeastOnce()).showMessage(captor.capture());
+        verify(mockView, timeout(1000).atLeastOnce()).showMessage(captor.capture());
         String matchedMessage = captor.getAllValues().stream()
             .filter(msg -> msg.contains("예약이 완료되었습니다"))
             .findFirst()
@@ -146,7 +146,7 @@ public class ReservLabControllerTest {
         latch2.await(2, TimeUnit.SECONDS);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(mockView, atLeastOnce()).showMessage(captor.capture());
+        verify(mockView, timeout(1000).atLeastOnce()).showMessage(captor.capture());
 
         List<String> messages = captor.getAllValues();
         System.out.println("[TEST_LOG] 받은 메시지들: " + messages);
