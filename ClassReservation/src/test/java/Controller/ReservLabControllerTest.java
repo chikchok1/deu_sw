@@ -75,19 +75,16 @@ public class ReservLabControllerTest {
             this.latch2 = latch2;
         }
 
-        @Override
         protected void refreshReservationData(String roomName) {
             if (latch1 != null) {
                 checkRoomAvailability(roomName, isAvailable -> latch1.countDown());
             }
         }
 
-        @Override
         protected void loadReservationDataFromServer(String roomName) {
             // 생략
         }
 
-        @Override
         protected String sendReservationRequestToServer(String name, String room, String day, String time, String purpose, String role) {
             try {
                 BufferedReader in = Session.getIn();
@@ -99,7 +96,6 @@ public class ReservLabControllerTest {
             }
         }
 
-        @Override
         protected void checkRoomAvailability(String classRoom, Consumer<Boolean> callback) {
             try {
                 BufferedReader in = Session.getIn();
